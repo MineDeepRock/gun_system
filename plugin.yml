@@ -1,0 +1,13 @@
+name: MineDeepRock
+main: Main
+version: 1.0.0
+api: 3.0.0
+
+permissions:
+  MineDeepRock:
+    default: false
+    description: "ベース"
+    children:
+      Gun.Command:
+        default: true
+        description: "ガンシステム"
