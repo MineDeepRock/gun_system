@@ -43,15 +43,12 @@
     }
   ],
   "require": {
-    "ext-json": "*",
-    "ext-mysqli": "*",
     "pocketmine/pocketmine-mp": "*",
     "pocketmine/raklib": "^0.12.0",
     "pocketmine/spl": "^0.3.0",
     "pocketmine/binaryutils": "^0.1.0",
     "pocketmine/nbt": "^0.2.1",
     "pocketmine/math": "^0.2.0",
-    "pocketmine/snooze": "^0.1.0",
-    "ext-gd": "*"
+    "pocketmine/snooze": "^0.1.0"
   }
 }
