@@ -3,6 +3,7 @@
 namespace gun_system\listener;
 
 
+use gun_system\controller\DamageController;
 use gun_system\controller\EventController;
 use gun_system\pmmp\entities\BulletEntity;
 use gun_system\pmmp\event\BulletHitEvent;
@@ -162,6 +163,17 @@ class GunListener implements Listener
                     $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
                 }
             }
+        }
+    }
+
+    public function onProjectileHit(ProjectileHitEntityEvent $event) {
+        $bullet = $event->getEntity();
+        $victim = $event->getEntityHit();
+        $attacker = $bullet->getOwningEntity();
+
+        if ($bullet instanceof \gun_system\pmmp\entities\BulletEntity && $attacker instanceof Player) {
+            $damage = DamageController::calculateDamage($attacker, $victim);
+            EventController::getInstance()->callBulletHitEvent($attacker, $victim, $damage);
         }
     }
 }

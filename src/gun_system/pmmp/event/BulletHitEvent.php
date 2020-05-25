@@ -27,8 +27,6 @@ class BulletHitEvent extends PluginEvent
      */
     private $damage;
 
-    public static $handlerList = null;
-
     public function __construct(Plugin $plugin, Player $attacker, Entity $victim, float $damage) {
         $this->attacker = $attacker;
         $this->victim = $victim;
