@@ -20,21 +20,23 @@ class OverheatController
     private $onOverheat;
     private $onFinished;
 
+    private $handler;
+
     public function __construct(OverheatRate $rate, Closure $onOverheat, Closure $onFinished, TaskScheduler $scheduler) {
         $this->rate = $rate;
         $this->scheduler = $scheduler;
         $this->onOverheat = $onOverheat;
         $this->onFinished = $onFinished;
         $this->isOverheat = false;
-
-        if ($this->rate->getPerShoot() !== 0) {
-            $this->scheduler->scheduleRepeatingTask(new ClosureTask(function (int $currentTick): void {
-                $this->down(10);
-            }), 20 * 1);
-        }
     }
 
     public function raise(): void {
+        if ($this->handler !== null) {
+            if (!$this->handler->isCancelled()) {
+                $this->handler->cancel();
+            }
+        }
+
         if ($this->rate->getPerShoot() === 0)
             return;
 
@@ -49,6 +51,11 @@ class OverheatController
                 $this->reset();
             }), 20 * 2);
         }
+
+        $this->handler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick): void {
+            $this->down(100);
+            var_dump("down");
+        }), 20 * 3);
     }
 
     public function down(int $value): void {

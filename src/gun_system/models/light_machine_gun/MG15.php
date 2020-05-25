@@ -24,6 +24,6 @@ class MG15 extends LightMachineGun
             new MagazineReloadingType(100,100, 4.5),
             EffectiveRangeController::getInstance()->ranges[self::NAME],
             new GunPrecision(97, 75),
-            new OverheatRate(2.85));
+            new OverheatRate(2.9));
     }
 }
