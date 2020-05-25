@@ -87,7 +87,7 @@ class EffectiveRangeController
 
     public function loadAll() {
         foreach ($this->ranges as $name => $range) {
-            $path = "./plugin_data/gun_system/effective_ranges/" . $name . ".png";
+            $path = "./plugin_data/GunSystem/effective_ranges/" . $name . ".png";
             if (file_exists($path)) {
                 $this->ranges[$name] = $this->load($path);
             } else {

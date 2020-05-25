@@ -1,10 +1,10 @@
-name: MineDeepRock
+name: GunSystem
 main: Main
 version: 1.0.0
 api: 3.0.0
 
 permissions:
-  MineDeepRock:
+  GunSystem:
     default: false
     description: "ベース"
     children:
