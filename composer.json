@@ -3,7 +3,7 @@
   "authors": [
     {
       "name": "suinua"
-    },
+    }
   ],
   "autoload": {
     "psr-4": {
