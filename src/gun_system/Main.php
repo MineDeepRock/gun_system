@@ -1,5 +1,6 @@
 <?php
 
+namespace gun_system;
 
 use gun_system\controller\EffectiveRangeController;
 use gun_system\controller\EventController;

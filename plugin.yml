@@ -1,13 +1,10 @@
 name: GunSystem
-main: Main
+main: gun_system\Main
 version: 1.0.0
 api: 3.0.0
 
+
 permissions:
-  GunSystem:
-    default: false
-    description: "ベース"
-    children:
-      Gun.Command:
-        default: true
-        description: "ガンシステム"
+  Gun.Command:
+    default: true
+    description: "ガンシステム"
