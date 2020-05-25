@@ -4,7 +4,7 @@ public function onBulletHit(ProjectileHitEntityEvent $event): void {
     $victim = $event->getEntityHit();
     $attacker = $bullet->getOwningEntity();
 
-    if ($attacker instanceof Player) {
+    if ($bullet instanceof \gun_system\pmmp\entities\BulletEntity && $attacker instanceof Player) {
         $damage = \gun_system\controller\DamageController::calculateDamage($attacker,$victim);
         //$victim->setHealth($victim->getHealht()-$damage);
     }
