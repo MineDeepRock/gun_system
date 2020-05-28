@@ -7,6 +7,7 @@ namespace gun_system\interpreter;
 use Closure;
 use gun_system\client\GunClient;
 use gun_system\controller\gun_controllers\ClipReloadingController;
+use gun_system\controller\gun_controllers\GunMessageController;
 use gun_system\controller\gun_controllers\MagazineReloadingController;
 use gun_system\controller\gun_controllers\OneByOneReloadingController;
 use gun_system\controller\gun_controllers\OverheatController;
@@ -56,8 +57,6 @@ abstract class GunInterpreter
      */
     protected $overheatController;
 
-    private $isADS;
-
     public function __construct(Gun $gun, Player $owner, TaskScheduler $scheduler) {
         $this->scheduler = $scheduler;
         $this->owner = $owner;
@@ -82,11 +81,10 @@ abstract class GunInterpreter
             function () {
                 $this->cancelShooting();
                 OtherGunSoundsController::LMGOverheat()->play($this->owner);
-                $this->owner->sendPopup("オーバーヒート");
             },
             function () {
                 OtherGunSoundsController::LMGReady()->play($this->owner);
-                $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
+                GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             },
             $this->scheduler);
 
@@ -114,21 +112,17 @@ abstract class GunInterpreter
     }
 
     public function tryShootOnce() {
-        if ($this->reloadingController->isCancelable())
-            $this->reloadingController->cancelReloading();
-
         if ($this->reloadingController->isReloading()) {
-            $this->owner->sendPopup("リロード中");
-            return;
+            if ($this->reloadingController->isCancelable()) {
+                $this->reloadingController->cancelReloading();
+            } else {
+                GunMessageController::sendReloadingMessage($this->owner);
+                return;
+            }
         }
 
         if ($this->reloadingController->isEmpty()) {
             $this->tryReload();
-            return;
-        }
-
-        if ($this->reloadingController->isReloading()) {
-            $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
             return;
         }
 
@@ -137,24 +131,25 @@ abstract class GunInterpreter
         }
 
         if ($this->overheatController->isOverheat()) {
-            $this->owner->sendPopup("オーバーヒート中");
+            GunMessageController::sendOverheatingMessage($this->owner);
             return;
         }
 
         $this->shootingController->shootOnce(function (): void {
             $this->overheatController->raise();
-            $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             $this->client->shoot($this->reloadingController->currentBullet, $this->reloadingController->magazineCapacity, $this->scheduler);
         });
     }
 
     public function tryShoot(): void {
-        if ($this->reloadingController->isCancelable())
-            $this->reloadingController->cancelReloading();
-
         if ($this->reloadingController->isReloading()) {
-            $this->owner->sendPopup("リロード中");
-            return;
+            if ($this->reloadingController->isCancelable()) {
+                $this->reloadingController->cancelReloading();
+            } else {
+                GunMessageController::sendReloadingMessage($this->owner);
+                return;
+            }
         }
 
         if ($this->reloadingController->isEmpty()) {
@@ -163,7 +158,7 @@ abstract class GunInterpreter
         }
 
         if ($this->overheatController->isOverheat()) {
-            $this->owner->sendPopup("オーバーヒート中");
+            GunMessageController::sendOverheatingMessage($this->owner);
             return;
         }
 
@@ -172,7 +167,7 @@ abstract class GunInterpreter
             $this->shootingController->delayShoot(1 / $this->gun->getRate()->getPerSecond(), function (): void {
                 $this->client->shoot($this->reloadingController->currentBullet, $this->reloadingController->magazineCapacity, $this->scheduler);
             });
-            $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             return;
         }
 
@@ -183,42 +178,42 @@ abstract class GunInterpreter
         }
         $this->shootingController->shoot(function (): void {
             $this->overheatController->raise();
-            $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             $this->client->shoot($this->reloadingController->currentBullet, $this->reloadingController->magazineCapacity, $this->scheduler);
         });
     }
 
     public function tryReload(): void {
         if ($this->reloadingController->isReloading()) {
-            $this->owner->sendPopup("リロード中");
+            if ($this->reloadingController instanceof MagazineReloadingController) return;
+            GunMessageController::sendReloadingMessage($this->owner);
             return;
         }
 
         if ($this->reloadingController->isFull()) {
-            $this->owner->sendPopup("Max");
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             return;
         }
 
         if ($this->gun->getRemainingAmmo() === 0) {
-            $this->owner->sendPopup("弾薬がありません");
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
             return;
         }
 
         if ($this->overheatController->isOverheat()) {
-            $this->owner->sendPopup("オーバーヒート中");
+            GunMessageController::sendOverheatingMessage($this->owner);
             return;
         }
 
         $this->cancelShooting();
 
-        $this->owner->sendPopup("リロード");
         $reduceBulletFunc = function ($value): int {
-            $this->gun->setRemainingAmmo($this->gun->getRemainingAmmo()-$value);
+            $this->gun->setRemainingAmmo($this->gun->getRemainingAmmo() - $value);
             return $this->gun->getRemainingAmmo();
         };
 
         $onFinishedReloading = function (): void {
-            $this->owner->sendPopup(TextFormat::BLUE . TextFormat::BOLD . $this->reloadingController->currentBullet . "\\" . TextFormat::RESET . TextFormat::BLUE  . $this->gun->getRemainingAmmo());
+            GunMessageController::sendBulletCount($this->owner, $this->reloadingController->currentBullet, $this->gun->getRemainingAmmo());
         };
 
         $this->reloadingController->carryOut($this->scheduler, $this->gun->getRemainingAmmo(), $reduceBulletFunc, $onFinishedReloading);

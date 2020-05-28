@@ -64,7 +64,7 @@ class ShootingController
         $this->ontoCoolTime();
         if (!$this->isShooting) {
             ($this->reduceBulletFunc)(1);
-            $onSucceed($this->scheduler);
+            $onSucceed();
         }
     }
 
@@ -79,7 +79,7 @@ class ShootingController
             //TODO:あんまりよくない
             $this->ontoCoolTime();
             $currentBullet = ($this->reduceBulletFunc)(1);
-            $onSucceed($this->scheduler);
+            $onSucceed();
             if ($currentBullet === 0)
                 $this->cancelShooting();
         }), 20 * (1 / $this->rate->getPerSecond()));

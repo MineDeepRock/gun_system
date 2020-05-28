@@ -54,7 +54,6 @@ class OverheatController
 
         $this->handler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick): void {
             $this->down(100);
-            var_dump("down");
         }), 20 * 3);
     }
 

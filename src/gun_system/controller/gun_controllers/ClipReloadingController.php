@@ -67,11 +67,13 @@ class ClipReloadingController extends ReloadingController
                 $this->currentBullet++;
                 $inventoryBullets = $reduceBulletFunc(1);
                 $onFinished();
-                if ($inventoryBullets === 0)
+                if ($inventoryBullets === 0 || $this->currentBullet === $this->magazineCapacity) {
                     $this->oneReloadTaskHandler->cancel();
-                if ($this->currentBullet === $this->magazineCapacity)
-                    $this->oneReloadTaskHandler->cancel();
+                    $this->onReloading = false;
+                }
             }), 20 * $this->secondOfOne, 20 * $this->secondOfOne);
+        } else {
+            $this->onReloading = false;
         }
     }
 
