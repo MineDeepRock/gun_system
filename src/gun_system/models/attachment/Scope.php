@@ -10,9 +10,9 @@ abstract class Scope extends Attachment
 {
     private $magnification;
 
-    public function __construct(string $name,Magnification $magnification,GunType $supportGunType) {
+    public function __construct(string $name, Magnification $magnification, GunType $supportGunType) {
         $this->magnification = $magnification;
-        parent::__construct($name, AttachmentType::Scope(),$supportGunType);
+        parent::__construct($name, AttachmentType::Scope(), $supportGunType);
     }
 
     /**
