@@ -23,4 +23,11 @@ abstract class Attachment
     public function getSupportGunType(): GunType {
         return $this->supportGunType;
     }
+
+    /**
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
+    }
 }
