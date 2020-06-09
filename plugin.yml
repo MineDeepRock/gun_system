@@ -2,9 +2,3 @@ name: GunSystem
 main: gun_system\Main
 version: 1.0.0
 api: 3.0.0
-
-
-permissions:
-  Gun.Command:
-    default: true
-    description: "ガンシステム"
