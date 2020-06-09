@@ -36,53 +36,53 @@ use gun_system\models\sub_machine_gun\MP18;
 
 class GunList
 {
-    private $ar = [];
-    private $hg = [];
-    private $sg = [];
-    private $sn = [];
-    private $smg = [];
-    private $lmg = [];
-    private $rv = [];
+    static private $ar = [];
+    static private $hg = [];
+    static private $sg = [];
+    static private $sn = [];
+    static private $smg = [];
+    static private $lmg = [];
+    static private $rv = [];
 
     public function __construct() {
-        $this->ar = [
+        self::$ar = [
             new M1907SL(),
             new CeiRigotti(),
             new FedorovAvtomat(),
             new Ribeyrolles(),
         ];
-        $this->hg = [
+        self::$hg = [
             new Mle1903(),
             new P08(),
             new C96(),
             new HowdahPistol(),
         ];
-        $this->sg = [
+        self::$sg = [
             new M1897(),
             new Model10A(),
             new Automatic12G(),
             new Model1900(),
         ];
-        $this->sn = [
+        self::$sn = [
             new SMLEMK3(),
             new Gewehr98(),
             new MartiniHenry(),
             new VetterliVitali(),
             new GewehrM95(),
         ];
-        $this->smg = [
+        self::$smg = [
             new MP18(),
             new Automatico(),
             new Hellriegel1915(),
             new FrommerStopAuto(),
         ];
-        $this->lmg = [
+        self::$lmg = [
             new LewisGun(),
             new Chauchat(),
             new MG15(),
             new BAR1918()
         ];
-        $this->rv = [
+        self::$rv = [
             new ColtSAA(),
             new NagantRevolver(),
             new No3Revolver(),
@@ -198,49 +198,49 @@ class GunList
     /**
      * @return array
      */
-    public function getAssaultRifles(): array {
-        return $this->ar;
+    public static function getAr(): array {
+        return self::$ar;
     }
 
     /**
      * @return array
      */
-    public function getHandguns(): array {
-        return $this->hg;
+    public static function getHg(): array {
+        return self::$hg;
     }
 
     /**
      * @return array
      */
-    public function getShotguns(): array {
-        return $this->sg;
+    public static function getSg(): array {
+        return self::$sg;
     }
 
     /**
      * @return array
      */
-    public function getSniperRifles(): array {
-        return $this->sn;
+    public static function getSn(): array {
+        return self::$sn;
     }
 
     /**
      * @return array
      */
-    public function getSMGs(): array {
-        return $this->smg;
+    public static function getSmg(): array {
+        return self::$smg;
     }
 
     /**
      * @return array
      */
-    public function getLMGs(): array {
-        return $this->lmg;
+    public static function getLmg(): array {
+        return self::$lmg;
     }
 
     /**
      * @return array
      */
-    public function getRevolvers(): array {
-        return $this->rv;
+    public static function getRv(): array {
+        return self::$rv;
     }
 }
