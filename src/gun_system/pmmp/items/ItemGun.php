@@ -48,10 +48,6 @@ ItemGun extends Tool
         $this->gunInterpreter->cancelReloading();
     }
 
-    public function scare(Closure $onFinished): void {
-        $this->gunInterpreter->scare($onFinished);
-    }
-
     public function getGunData(): Gun {
         return $this->gunInterpreter->getGunData();
     }

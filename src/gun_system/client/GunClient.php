@@ -9,6 +9,7 @@ use gun_system\controller\sounds_controllers\ShootSoundsController;
 use gun_system\models\Gun;
 use gun_system\models\shotgun\Shotgun;
 use gun_system\pmmp\entities\BulletEntity;
+use pocketmine\entity\Effect;
 use pocketmine\level\particle\CriticalParticle;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
@@ -88,6 +89,7 @@ class GunClient
 
         $aimPos = $player->getDirectionVector();
         $value = $player->isSneaking() ? $precision->getADS() : $precision->getHipShooting();
+        if ($player->getEffect(Effect::NIGHT_VISION) === null) $value -= 3;
 
         $nbt = new CompoundTag("", [
             "Pos" => new ListTag("Pos", [

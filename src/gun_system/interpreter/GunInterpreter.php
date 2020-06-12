@@ -95,14 +95,6 @@ abstract class GunInterpreter
         $this->shootingController->whenBecomeReady = $whenBecomeReady;
     }
 
-    public function scare(Closure $onFinished): void {
-        $this->gun->setPrecision(new GunPrecision($this->gun->getPrecision()->getADS() - 3, $this->gun->getPrecision()->getHipShooting() - 3));
-        $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick): void {
-            $this->gun->setPrecision(new GunPrecision($this->gun->getPrecision()->getADS() + 3, $this->gun->getPrecision()->getHipShooting() + 3));
-        }), 20 * 3);
-        $this->client->scare($this->scheduler, $onFinished);
-    }
-
     public function cancelShooting(): void {
         $this->shootingController->cancelShooting();
     }

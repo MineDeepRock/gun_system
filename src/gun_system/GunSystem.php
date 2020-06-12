@@ -43,6 +43,8 @@ use gun_system\pmmp\items\ItemRevolver;
 use gun_system\pmmp\items\ItemShotGun;
 use gun_system\pmmp\items\ItemSniperRifle;
 use gun_system\pmmp\items\ItemSubMachineGun;
+use pocketmine\entity\Effect;
+use pocketmine\entity\EffectInstance;
 use pocketmine\Player;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -159,5 +161,27 @@ class GunSystem
     static private function setItemDescription(ItemGun $item): ItemGun {
         $gun = $item->getGunData();
         return $item->setLore([$gun->getDescribe()]);
+    }
+
+    static function giveAmmo(Player $player, int $slot, int $value): bool {
+        $gunItem = $player->getInventory()->getHotbarSlotItem($slot);
+        if ($gunItem instanceof ItemGun) {
+            $gun = $gunItem->getGunData();
+            $empty = $gun->getReloadingType()->initialAmmo - $gun->getRemainingAmmo();
+            if ($empty === 0) return false;
+            if ($empty > $value) {
+                $gunItem->getGunData()->setRemainingAmmo($gun->getRemainingAmmo() + $value);
+                return true;
+            } else {
+                $gunItem->getGunData()->setRemainingAmmo($gun->getRemainingAmmo() + $empty);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    static function threaten(Player $player) {
+        $player->addEffect(new EffectInstance(Effect::getEffect(Effect::NIGHT_VISION), 5, 1));
     }
 }
