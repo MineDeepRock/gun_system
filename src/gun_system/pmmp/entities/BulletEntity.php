@@ -2,12 +2,14 @@
 
 namespace gun_system\pmmp\entities;
 
+use gun_system\controller\DamageController;
 use gun_system\controller\EventController;
 use gun_system\controller\sounds_controllers\BulletSoundsController;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Egg;
 use pocketmine\entity\projectile\Projectile;
+use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\level\Level;
 use pocketmine\level\particle\ExplodeParticle;
@@ -53,5 +55,15 @@ class BulletEntity extends Projectile
 
     protected function onHit(ProjectileHitEvent $event): void {
         if ($this->isAlive()) $this->kill();
+    }
+
+    protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult): void {
+        $victim = $entityHit;
+        $attacker = $this->getOwningEntity();
+
+        if ($attacker instanceof Player) {
+            $damage = DamageController::calculateDamage($attacker, $victim);
+            EventController::getInstance()->callBulletHitEvent($attacker, $victim, $damage);
+        }
     }
 }
