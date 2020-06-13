@@ -5,15 +5,10 @@ namespace gun_system\listener;
 
 use gun_system\controller\DamageController;
 use gun_system\controller\EventController;
-use gun_system\pmmp\entities\BulletEntity;
-use gun_system\pmmp\event\BulletHitEvent;
 use gun_system\pmmp\items\ItemGun;
 use gun_system\pmmp\items\ItemSniperRifle;
-use pocketmine\block\Redstone;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
-use pocketmine\entity\Entity;
-use pocketmine\entity\Human;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\ProjectileHitEntityEvent;
@@ -22,11 +17,8 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\inventory\transaction\action\DropItemAction;
-use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
@@ -104,19 +96,7 @@ class GunListener implements Listener
     //銃を捨てるでリロード
     public function onThrowAwayGun(InventoryTransactionEvent $event): void {
         $player = $event->getTransaction()->getSource();
-        $actions = array_values($event->getTransaction()->getActions());
-
-        $dropItemActions = array_values(array_filter($actions, function ($item) {
-            return $item instanceof DropItemAction;
-        }));
-        $slotChangeActions = array_values(array_filter($actions, function ($item) {
-            return $item instanceof SlotChangeAction;
-        }));
-
-
-        if (count($dropItemActions) !== 0 && count($slotChangeActions) !== 0) {
-            $event->setCancelled();
-        }
+        if ($player->getInventory()->getItemInHand() instanceof ItemGun) $event->setCancelled();
     }
 
     //アイテム持ち替えでリロードキャンセル
