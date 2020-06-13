@@ -96,13 +96,6 @@ class GunListener implements Listener
     //銃を捨てるでリロード
     public function onThrowAwayGun(InventoryTransactionEvent $event): void {
         $player = $event->getTransaction()->getSource();
-        foreach ($event->getTransaction()->getActions() as $action) {
-            if ($action->getSourceItem() instanceof ItemGun || $action->getTargetItem() instanceof ItemGun){
-                $event->setCancelled();
-                $player->getInventory()->sendContents($player);
-                return;
-            }
-        }
         if ($player->getInventory()->getItemInHand() instanceof ItemGun) {
             $event->setCancelled();
             $player->getInventory()->sendContents($player);
