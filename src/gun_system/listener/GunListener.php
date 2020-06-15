@@ -3,16 +3,12 @@
 namespace gun_system\listener;
 
 
-use gun_system\controller\DamageController;
-use gun_system\controller\EventController;
-use gun_system\pmmp\entities\BulletEntity;
 use gun_system\pmmp\items\ItemGun;
 use gun_system\pmmp\items\ItemSniperRifle;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;

@@ -3,7 +3,6 @@
 namespace gun_system;
 
 use gun_system\controller\EffectiveRangeController;
-use gun_system\controller\EventController;
 use gun_system\listener\GunListener;
 use gun_system\models\GunList;
 use gun_system\pmmp\entities\BulletEntity;
@@ -14,8 +13,6 @@ use pocketmine\plugin\PluginBase;
 class Main extends PluginBase implements Listener
 {
     public function onEnable() {
-        new EventController($this);
-
         $controller = new EffectiveRangeController();
         $controller->loadAll();
         new GunList();

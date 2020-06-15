@@ -4,11 +4,10 @@
 namespace gun_system\pmmp\event;
 
 
-use pocketmine\event\plugin\PluginEvent;
+use pocketmine\event\Event;
 use pocketmine\Player;
-use pocketmine\plugin\Plugin;
 
-class BulletHitNearEvent extends PluginEvent
+class BulletHitNearEvent extends Event
 {
 
     protected $eventName = "BulletHitNearEvent";
@@ -22,10 +21,9 @@ class BulletHitNearEvent extends PluginEvent
      */
     private $victim;
 
-    public function __construct(Plugin $plugin, Player $attacker, Player $victim) {
+    public function __construct(Player $attacker, Player $victim) {
         $this->attacker = $attacker;
         $this->victim = $victim;
-        parent::__construct($plugin);
     }
 
     /**
