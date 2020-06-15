@@ -45,8 +45,13 @@ use gun_system\pmmp\items\ItemSniperRifle;
 use gun_system\pmmp\items\ItemSubMachineGun;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
+use pocketmine\level\Level;
+use pocketmine\level\particle\FloatingTextParticle;
+use pocketmine\level\Position;
 use pocketmine\Player;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
+use pocketmine\utils\TextFormat;
 
 class GunSystem
 {
@@ -183,5 +188,35 @@ class GunSystem
 
     static function threaten(Player $player) {
         $player->addEffect(new EffectInstance(Effect::getEffect(Effect::NIGHT_VISION), 5, 1));
+    }
+
+    static function sendHitMessage(Player $attacker, bool $isFinisher) {
+        if ($isFinisher) {
+            $attacker->addTitle(TextFormat::RED . "><", "", 0, 1, 0);
+        } else {
+            $attacker->addTitle("><", "", 0, 1, 0);
+        }
+    }
+
+    static function sendHitParticle(Level $level, Position $position, float $value, bool $isFinisher) {
+        if ($isFinisher) {
+            $text = str_repeat(TextFormat::RED . "■", intval($value));
+        } else if ($value <= 5) {
+            $text = str_repeat(TextFormat::WHITE . "■", intval($value));
+        } else if ($value <= 15) {
+            $text = str_repeat(TextFormat::GREEN . "■", intval($value));
+        } else {
+            $text = str_repeat(TextFormat::YELLOW . "■", intval($value));
+        }
+
+        $position = $position->add(rand(-2, 2), rand(0, 3), rand(-2, 2));
+        $particle = new FloatingTextParticle($position, $text, "");
+        $level->addParticle($particle);
+
+        self::$scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($level, $particle): void {
+            $particle->setInvisible(true);
+            $level->addParticle($particle);
+        }), 20 * 1.5);
+
     }
 }
