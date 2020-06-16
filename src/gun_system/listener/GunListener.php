@@ -3,6 +3,7 @@
 namespace gun_system\listener;
 
 
+use gun_system\models\GunList;
 use gun_system\pmmp\items\ItemGun;
 use gun_system\pmmp\items\ItemSniperRifle;
 use pocketmine\entity\Effect;
@@ -92,10 +93,15 @@ class GunListener implements Listener
 
     //銃を捨てるでリロード
     public function onThrowAwayGun(InventoryTransactionEvent $event): void {
-        $player = $event->getTransaction()->getSource();
-        if ($player->getInventory()->getItemInHand() instanceof ItemGun) {
-            $event->setCancelled();
-            $player->getInventory()->sendContents($player);
+        $actions = array_values($event->getTransaction()->getActions());
+
+        foreach (array_values($actions) as $action){
+            $item = $action->getTargetItem();
+
+            //TODO:リファクタリング
+            if (GunList::fromString($item->getName()) !== null) {
+                $event->setCancelled();
+            }
         }
     }
 
