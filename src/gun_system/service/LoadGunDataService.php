@@ -11,8 +11,22 @@ class LoadGunDataService
 {
     private const PATH = ".\plugin_data\TeamSystem\players\\";
 
-    static function execute(string $name): Gun {
+    static function findByName(string $name): Gun {
         $data = json_decode(file_get_contents(self::PATH . $name . ".json"), true);
         return GunJsonAdapter::decode($data);
+    }
+
+    static function getAll(): array {
+        $guns = [];
+        $dh = opendir(self::PATH);
+        while (($fileName = readdir($dh)) !== false) {
+            if (filetype(self::PATH . $fileName) === "file") {
+                $data = json_decode(file_get_contents(self::PATH . $fileName), true);
+                $guns[] = GunJsonAdapter::decode($data);
+            }
+        }
+        closedir($dh);
+
+        return $guns;
     }
 }
