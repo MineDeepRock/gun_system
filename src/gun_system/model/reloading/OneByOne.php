@@ -11,4 +11,8 @@ class OneByOne extends ReloadingData
     public function __construct(float $second) {
         $this->second = $second;
     }
+
+    public function toString(): string {
+        return "{$this->second}s";
+    }
 }

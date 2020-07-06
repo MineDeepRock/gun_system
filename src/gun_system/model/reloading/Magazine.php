@@ -17,4 +17,8 @@ class Magazine extends ReloadingData {
     public function getSecond(): float {
         return $this->second;
     }
+
+    public function toString(): string {
+        return "{$this->second}s";
+    }
 }

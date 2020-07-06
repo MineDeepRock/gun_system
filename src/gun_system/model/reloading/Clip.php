@@ -36,4 +36,8 @@ class Clip extends ReloadingData
     public function getSecondOfOne(): float {
         return $this->secondOfOne;
     }
+
+    public function toString(): string {
+        return "Clip({$this->getClipCapacity()}):{$this->getSecondOfClip()}s,One:{$this->getSecondOfOne()}s";
+    }
 }
