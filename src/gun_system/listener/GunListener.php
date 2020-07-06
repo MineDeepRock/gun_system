@@ -3,9 +3,8 @@
 namespace gun_system\listener;
 
 
-use gun_system\models\GunList;
-use gun_system\pmmp\items\ItemGun;
-use gun_system\pmmp\items\ItemSniperRifle;
+use gun_system\pmmp\item\ItemGun;
+use gun_system\pmmp\item\ItemSniperRifle;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -13,6 +12,7 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\item\Item;
@@ -20,15 +20,22 @@ use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
+use pocketmine\scheduler\TaskScheduler;
 
 class GunListener implements Listener
 {
+    private $scheduler;
+
+    public function __construct(TaskScheduler $scheduler) {
+        $this->scheduler = $scheduler;
+    }
+
     public function tryShootingOnce(Player $player, Item $item): void {
         if ($item instanceof ItemGun) {
             if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
             } else {
-                $item->shootOnce();
+                $item->shootOnce($player);
             }
         }
     }
@@ -40,20 +47,8 @@ class GunListener implements Listener
             } else if ($item instanceof ItemSniperRifle) {
                 $item->aim();
             } else {
-                $item->shoot();
+                $item->shoot($player);
             }
-        }
-    }
-
-    public function tryReloading(Item $item): void {
-        if ($item instanceof ItemGun) {
-            $item->reload();
-        }
-    }
-
-    public function tryCancelReloading(Item $item): void {
-        if ($item instanceof ItemGun) {
-            $item->cancelReloading();
         }
     }
 
@@ -95,7 +90,7 @@ class GunListener implements Listener
     public function onThrowAwayGun(InventoryTransactionEvent $event): void {
         $actions = array_values($event->getTransaction()->getActions());
 
-        foreach (array_values($actions) as $action){
+        foreach (array_values($actions) as $action) {
             $item = $action->getTargetItem();
 
             //TODO:リファクタリング
@@ -106,15 +101,15 @@ class GunListener implements Listener
     }
 
     //アイテム持ち替えでリロードキャンセル
-    public function onChangeHoldItem(\pocketmine\event\player\PlayerItemHeldEvent $event) {
+    public function onChangeHoldItem(PlayerItemHeldEvent $event) {
         $player = $event->getPlayer();
         $currentItem = $player->getInventory()->getItemInHand();
         $nextItem = $event->getItem();
-        if ($currentItem instanceof \gun_system\pmmp\items\ItemGun) {
+        if ($currentItem instanceof ItemGun) {
             if ($currentItem->getName() === $nextItem->getName()) {
-                $this->tryReloading($currentItem);
+                $currentItem->reload($player);
             } else {
-                $this->tryCancelReloading($currentItem);
+                $currentItem->cancelReloading();
             }
         }
     }
@@ -130,7 +125,9 @@ class GunListener implements Listener
             );
             if ($player->getPosition()->distance($touchedBlockPos) < 3) {
                 $item = $event->getItem();
-                $this->tryReloading($item);
+                if ($item instanceof ItemGun) {
+                    $item->reload($player);
+                }
             }
         }
     }
@@ -141,13 +138,11 @@ class GunListener implements Listener
         if ($player->isSneaking()) {
             $player->getArmorInventory()->removeItem(ItemFactory::get(Item::PUMPKIN));
             $player->removeEffect(Effect::SLOWNESS);
-        } else {
-            if (is_subclass_of($item, "gun_system\pmmp\items\ItemGun")) {
-                $effectLevel = $item->getInterpreter()->getScope()->getMagnification()->getValue();
-                $player->addEffect(new EffectInstance(Effect::getEffect(Effect::SLOWNESS), null, $effectLevel, false));
-                if ($item instanceof ItemSniperRifle) {
-                    $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
-                }
+        } else if ($item instanceof ItemGun) {
+            $effectLevel = $item->getGun()->getScope()->getMagnification();
+            $player->addEffect(new EffectInstance(Effect::getEffect(Effect::SLOWNESS), null, $effectLevel, false));
+            if ($item instanceof ItemSniperRifle) {
+                $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
             }
         }
     }

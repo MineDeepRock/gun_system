@@ -1,0 +1,28 @@
+{
+  "type": "",
+  "name": "",
+  "attack_point": 0.0,
+  "firing_rate": 0.0,
+  "bullet_speed": 0.0,
+  "reaction": 0.0,
+  "precision": {
+    "ads": 0.0,
+    "hip_shooting": 0.0
+  },
+  "overheating_rate": 0.0,
+  "magazine_data": {
+    "capacity": 0.0
+  },
+  "initial_ammo": 0,
+  "reloading_data": {
+    "type": "magazine,clip,one_by_one",
+    "second": 0.0,
+    //magazine,one_by_one
+    "clip_capacity": 0,
+    //clip
+    "second_of_clip": 0,
+    //clip
+    "second_of_one": 0
+    //clip
+  }
+}
