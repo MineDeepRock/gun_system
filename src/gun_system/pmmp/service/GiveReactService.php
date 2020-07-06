@@ -11,12 +11,12 @@ use pocketmine\Player;
 class GiveReactService
 {
     static function execute(Player $player, Reaction $reaction) {
-        if ($reaction !== 0.0 && !$player->isSneaking()) {
+        if ($reaction->getValue() !== 0.0 && !$player->isSneaking()) {
             $playerPosition = $player->getLocation();
             $dir = -$playerPosition->getYaw() - 90.0;
             $pitch = -$playerPosition->getPitch() - 180.0;
-            $xd = $reaction * $reaction * cos(deg2rad($dir)) * cos(deg2rad($pitch)) / 6;
-            $zd = $reaction * $reaction * -sin(deg2rad($dir)) * cos(deg2rad($pitch)) / 6;
+            $xd = $reaction->getValue() * $reaction->getValue() * cos(deg2rad($dir)) * cos(deg2rad($pitch)) / 6;
+            $zd = $reaction->getValue() * $reaction->getValue() * -sin(deg2rad($dir)) * cos(deg2rad($pitch)) / 6;
 
             $vec = new Vector3($xd, 0, $zd);
             $vec->multiply(3);

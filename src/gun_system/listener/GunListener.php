@@ -3,8 +3,10 @@
 namespace gun_system\listener;
 
 
+use gun_system\model\GunType;
 use gun_system\pmmp\item\ItemGun;
 use gun_system\pmmp\item\ItemSniperRifle;
+use gun_system\service\LoadGunDataService;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -44,7 +46,7 @@ class GunListener implements Listener
         if ($item instanceof ItemGun) {
             if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
-            } else if ($item instanceof ItemSniperRifle) {
+            } else if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
                 $item->aim();
             } else {
                 $item->shoot($player);
@@ -93,8 +95,7 @@ class GunListener implements Listener
         foreach (array_values($actions) as $action) {
             $item = $action->getTargetItem();
 
-            //TODO:リファクタリング
-            if (GunList::fromString($item->getName()) !== null) {
+            if (file_exists(LoadGunDataService::PATH . $item->getName() . ".json")) {
                 $event->setCancelled();
             }
         }

@@ -59,23 +59,30 @@ class ItemGun extends Tool
         $this->shootingController = new ShootingController($this->scheduler, $this->gun->getType(), $this->gun->getFiringRate(), $this->gun->getMagazineData());
         $this->overheatingController = new OverheatingController($this->scheduler,
             function () {
-
+                //TODO
             },
             function () {
-
+                //TODO
             });
 
-        parent::__construct(ItemIds::BOW, 0, $this->gun);
+        parent::__construct(ItemIds::BOW, 0, $this->gun->getName());
         $this->setUnbreakable(true);
+        $this->setCustomName($this->gun->getName());
     }
 
     public function getMaxDurability(): int {
         return 100;
     }
 
+    public function aim(): void { }
+
     public function onReleaseUsing(Player $player): bool {
-        $this->shootingController->cancelShooting();
-        $player->getInventory()->sendContents($player);
+        if ($this->gun->getType()->equals(GunType::SniperRifle())) {
+            $this->shoot($player);
+        } else {
+            $this->shootingController->cancelShooting();
+            $player->getInventory()->sendContents($player);
+        }
         return false;
     }
 
