@@ -10,7 +10,7 @@ use gun_system\model\performance\DamageGraph;
 class LoadDamageGraphService
 {
     static function execute(string $name): DamageGraph {
-        $im = imagecreatefrompng("./plugin_data/GunSystem/effective_ranges/" . $name . ".png");
+        $im = imagecreatefrompng("./plugin_data/GunSystem/damage_graph/" . $name . ".png");
         $range = [];
         $rgb = [];
         $x = 0;

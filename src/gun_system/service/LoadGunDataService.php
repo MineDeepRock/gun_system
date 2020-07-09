@@ -9,7 +9,7 @@ use gun_system\model\Gun;
 
 class LoadGunDataService
 {
-    const PATH = ".\plugin_data\GunSystem\gun_data\\";
+    const PATH = ".\plugin_data\GunSystem\gun_spec\\";
 
     static function findByName(string $name): Gun {
         $data = json_decode(file_get_contents(self::PATH . $name . ".json"), true);
