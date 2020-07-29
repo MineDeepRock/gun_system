@@ -4,9 +4,11 @@
 namespace gun_system;
 
 
+use gun_system\model\Gun;
 use gun_system\pmmp\item\ItemGun;
 use gun_system\pmmp\service\GenerateGunDescriptionService;
 use gun_system\service\GiveScareService;
+use gun_system\service\LoadGunDataService;
 use pocketmine\level\Level;
 use pocketmine\level\particle\FloatingTextParticle;
 use pocketmine\level\Position;
@@ -23,8 +25,16 @@ class GunSystem
         self::$scheduler = $scheduler;
     }
 
+    static function loadAllGuns(): array {
+        return LoadGunDataService::getAll();
+    }
+
+    static function findGunByName(string $name): Gun {
+        return LoadGunDataService::findByName($name);
+    }
+
     static function getItemGun(string $name): ItemGun {
-        $gun = GunsStore::findGunByName($name);
+        $gun = self::findGunByName($name);
         $itemGun = new ItemGun($gun, self::$scheduler);
         $itemGun->setLore([GenerateGunDescriptionService::get($gun)]);
         return $itemGun;
