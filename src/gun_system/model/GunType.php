@@ -47,6 +47,34 @@ class GunType
         return new GunType("Revolver");
     }
 
+    static function fromString(string $text): ?GunType {
+        switch ($text) {
+            case self::HandGun()->getTypeText():
+                return self::HandGun();
+                break;
+            case self::AssaultRifle()->getTypeText():
+                return self::AssaultRifle();
+                break;
+            case self::LMG()->getTypeText():
+                return self::LMG();
+                break;
+            case self::Shotgun()->getTypeText():
+                return self::Shotgun();
+                break;
+            case self::SniperRifle()->getTypeText():
+                return self::SniperRifle();
+                break;
+            case self::SMG()->getTypeText():
+                return self::SMG();
+                break;
+            case self::Revolver()->getTypeText():
+                return self::Revolver();
+                break;
+        }
+
+        return null;
+    }
+
     /**
      * @return string
      */
