@@ -40,6 +40,12 @@ class GunSystem
         return $itemGun;
     }
 
+    static function getItemGunFromGun(Gun $gun): ItemGun {
+        $itemGun = new ItemGun($gun, self::$scheduler);
+        $itemGun->setLore([GenerateGunDescriptionService::get($gun)]);
+        return $itemGun;
+    }
+
     static function giveAmmo(Player $player, int $slot, int $value): bool {
         $gunItem = $player->getInventory()->getHotbarSlotItem($slot);
         if ($gunItem instanceof ItemGun) {
