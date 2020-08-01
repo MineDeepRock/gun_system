@@ -90,4 +90,8 @@ class GunSystem
             $level->addParticle($particle);
         }), 20 * 1.5);
     }
+
+    static function getGunDescription(Gun $gun): string {
+        return GenerateGunDescriptionService::get($gun);
+    }
 }
