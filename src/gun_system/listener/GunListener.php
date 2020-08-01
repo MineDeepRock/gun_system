@@ -5,7 +5,6 @@ namespace gun_system\listener;
 
 use gun_system\model\GunType;
 use gun_system\pmmp\item\ItemGun;
-use gun_system\pmmp\item\ItemSniperRifle;
 use gun_system\service\LoadGunDataService;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
