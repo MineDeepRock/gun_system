@@ -78,7 +78,7 @@ class ItemGun extends Tool
 
     public function onReleaseUsing(Player $player): bool {
         if ($this->gun->getType()->equals(GunType::SniperRifle())) {
-            $this->shoot($player);
+            $this->shootOnce($player);
         } else {
             $this->shootingController->cancelShooting();
             $player->getInventory()->sendContents($player);

@@ -40,9 +40,9 @@ class CalculateDamageService
                 $gun = $itemGun->getGun();
 
                 if (intval($distance) > 99) {
-                    $damage = $gun->getAttackPoint()->getValue() * $gun->getDamageGraph()[99] / 100;
+                    $damage = $gun->getAttackPoint()->getValue() * $gun->getDamageGraph()->getGraph()[99] / 100;
                 } else {
-                    $damage = $gun->getAttackPoint()->getValue() * $gun->getDamageGraph()[intval($distance)] / 100;
+                    $damage = $gun->getAttackPoint()->getValue() * $gun->getDamageGraph()->getGraph()[intval($distance)] / 100;
                 }
 
                 return $damage / 5;
