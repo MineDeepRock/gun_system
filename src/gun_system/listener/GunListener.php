@@ -141,7 +141,7 @@ class GunListener implements Listener
         } else if ($item instanceof ItemGun) {
             $effectLevel = $item->getGun()->getScope()->getMagnification();
             $player->addEffect(new EffectInstance(Effect::getEffect(Effect::SLOWNESS), null, $effectLevel, false));
-            if ($item instanceof ItemSniperRifle) {
+            if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
                 $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
             }
         }
