@@ -15,6 +15,8 @@ use pocketmine\scheduler\TaskScheduler;
 
 class ClipReloadingController extends ReloadingController
 {
+    protected $isCancelable = true;
+    
     private $clipReloadTaskHandler;
     private $oneReloadTaskHandler;
     /**

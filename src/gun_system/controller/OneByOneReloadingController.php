@@ -13,6 +13,8 @@ use pocketmine\scheduler\TaskScheduler;
 
 class OneByOneReloadingController extends ReloadingController
 {
+    protected $isCancelable = true;
+
     private $oneReloadTaskHandler;
 
     public function cancel(): void {
