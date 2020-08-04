@@ -15,12 +15,15 @@ use gun_system\model\GunType;
 use gun_system\model\reloading\Clip;
 use gun_system\model\reloading\Magazine;
 use gun_system\model\reloading\OneByOne;
+use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\service\SendMessageService;
 use gun_system\pmmp\service\ShootingService;
+use gun_system\pmmp\sounds\OtherGunSounds;
 use pocketmine\item\ItemIds;
 use pocketmine\item\Tool;
 use pocketmine\Player;
 use pocketmine\scheduler\TaskScheduler;
+use pocketmine\Server;
 
 class ItemGun extends Tool
 {
@@ -57,12 +60,17 @@ class ItemGun extends Tool
         }
 
         $this->shootingController = new ShootingController($this->scheduler, $this->gun->getType(), $this->gun->getFiringRate(), $this->gun->getMagazineData());
+
+        //TODO:リファクタリング
         $this->overheatingController = new OverheatingController($this->scheduler,
-            function () {
-                //TODO
+            function (Player $player) {
+                $player->sendPopup("オーバーヒート");
+                $this->shootingController->cancelShooting();
+                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
             },
-            function () {
-                //TODO
+            function (Player $player) {
+                SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
+                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGReady());
             });
 
         parent::__construct(ItemIds::BOW, 0, $this->gun->getName());
@@ -124,7 +132,7 @@ class ItemGun extends Tool
 
         $this->shootingController->shoot(function () use ($player): void {
             ShootingService::execute($this->scheduler, $player, $this->gun);
-            $this->overheatingController->raise($this->gun->getOverheatRate());
+            $this->overheatingController->raise($this->gun->getOverheatRate(), $player);
             SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
         });
     }
@@ -155,7 +163,7 @@ class ItemGun extends Tool
 
         $this->shootingController->shootOnce(function () use ($player): void {
             ShootingService::execute($this->scheduler, $player, $this->gun);
-            $this->overheatingController->raise($this->gun->getOverheatRate());
+            $this->overheatingController->raise($this->gun->getOverheatRate(), $player);
             SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
         });
     }
