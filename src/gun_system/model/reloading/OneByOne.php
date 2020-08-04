@@ -6,7 +6,7 @@ namespace gun_system\model\reloading;
 
 class OneByOne extends ReloadingData
 {
-    public $second;
+    private $second;
 
     public function __construct(float $second) {
         $this->second = $second;
@@ -14,5 +14,12 @@ class OneByOne extends ReloadingData
 
     public function toString(): string {
         return "{$this->second}s";
+    }
+
+    /**
+     * @return float
+     */
+    public function getSecond(): float {
+        return $this->second;
     }
 }
