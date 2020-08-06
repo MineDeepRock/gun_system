@@ -23,7 +23,6 @@ use pocketmine\item\ItemIds;
 use pocketmine\item\Tool;
 use pocketmine\Player;
 use pocketmine\scheduler\TaskScheduler;
-use pocketmine\Server;
 
 class ItemGun extends Tool
 {

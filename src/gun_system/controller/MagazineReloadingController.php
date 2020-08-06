@@ -40,7 +40,7 @@ class MagazineReloadingController extends ReloadingController
             $this->messageHandler = $scheduler->scheduleRepeatingTask(new ClosureTask(function (int $tick) use ($player): void {
                 $this->reloadingProgress += 0.1;
                 SendMessageService::sendReloadingProgress($player, $this->magazineData->getCapacity(), $this->reloadingProgress, $this->reloadingData->getSecond());
-            }), 20 * 0.1);;
+            }), 20 * 0.1);
 
             $this->onReloading = true;
             $empty = $this->magazineData->getCapacity() - $this->magazineData->getCurrentAmmo();

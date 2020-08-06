@@ -70,9 +70,9 @@ class GunSystem
 
     static function sendHitMessage(Player $attacker, bool $isFinisher) {
         if ($isFinisher) {
-            $attacker->addTitle(TextFormat::RED . "><", "", 0, 1, 0);
+            $attacker->sendTitle(TextFormat::RED . "><", "", 0, 1, 0);
         } else {
-            $attacker->addTitle("><", "", 0, 1, 0);
+            $attacker->sendTitle("><", "", 0, 1, 0);
         }
     }
 
