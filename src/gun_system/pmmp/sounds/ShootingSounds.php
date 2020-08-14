@@ -23,6 +23,8 @@ class ShootingSounds
                 return self::SMG();
             case "Revolver":
                 return self::Revolver();
+            case "DMR":
+                return self::DMR();
         }
         return new GunSound("");
     }
@@ -53,5 +55,9 @@ class ShootingSounds
 
     public static function Revolver(): GunSound {
         return new GunSound("gun.assaultrifle.shoot");
+    }
+
+    public static function DMR(): GunSound {
+        return new GunSound("gun.dmr.shoot");
     }
 }
