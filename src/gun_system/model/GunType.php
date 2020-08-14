@@ -47,6 +47,10 @@ class GunType
         return new GunType("Revolver");
     }
 
+    public static function DMR():GunType {
+        return new GunType("DMR");
+    }
+
     static function fromString(string $text): ?GunType {
         switch ($text) {
             case self::HandGun()->getTypeText():
@@ -69,6 +73,9 @@ class GunType
                 break;
             case self::Revolver()->getTypeText():
                 return self::Revolver();
+                break;
+            case self::DMR()->getTypeText():
+                return self::DMR();
                 break;
         }
 
