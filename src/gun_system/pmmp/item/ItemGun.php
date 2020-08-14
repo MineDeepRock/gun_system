@@ -63,7 +63,7 @@ class ItemGun extends Tool
         //TODO:リファクタリング
         $this->overheatingController = new OverheatingController($this->scheduler,
             function (Player $player) {
-                $player->sendPopup("オーバーヒート");
+                $player->sendTip("オーバーヒート");
                 $this->shootingController->cancelShooting();
                 PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
             },

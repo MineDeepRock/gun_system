@@ -14,11 +14,11 @@ class SendMessageService
     }
 
     static function sendReloadingMessage(Player $player): void {
-        $player->sendPopup("リロード中");
+        $player->sendTip("リロード中");
     }
 
     static function sendOverheatingMessage(Player $player): void {
-        $player->sendPopup("オーバーヒート中");
+        $player->sendTip("オーバーヒート中");
     }
 
     static function sendReloadingProgress(Player $player, int $magazineCapacity, float $spendSecond, float $necessarySecond): void {
