@@ -24,8 +24,10 @@ class SpawnBulletEntityService
     static function execute(TaskScheduler $scheduler, Player $player, Precision $precision, BulletSpeed $bulletSpeed) {
 
         $aimPos = $player->getDirectionVector();
-        $value = $player->isSneaking() ? $precision->getADS() : $precision->getHipShooting();
-        if ($player->getEffect(Effect::NIGHT_VISION) === null) $value -= 3;
+        $precisionAsFloat = $player->isSneaking() ? $precision->getADS() : $precision->getHipShooting();
+        if ($player->getEffect(Effect::NIGHT_VISION) !== null) {
+            $precisionAsFloat -= (3 + $player->getEffect(Effect::NIGHT_VISION)->getAmplifier());
+        }
 
         $nbt = new CompoundTag("", [
             "Pos" => new ListTag("Pos", [
@@ -34,9 +36,9 @@ class SpawnBulletEntityService
                 new DoubleTag("", $player->getZ())
             ]),
             "Motion" => new ListTag("Motion", [
-                new DoubleTag("", $aimPos->getX() + rand(-(100 - $value), (100 - $value)) / 200),
-                new DoubleTag("", $aimPos->getY() + rand(-(100 - $value), (100 - $value)) / 200),
-                new DoubleTag("", $aimPos->getZ() + rand(-(100 - $value), (100 - $value)) / 200)
+                new DoubleTag("", $aimPos->getX() + rand(-(100 - $precisionAsFloat), (100 - $precisionAsFloat)) / 200),
+                new DoubleTag("", $aimPos->getY() + rand(-(100 - $precisionAsFloat), (100 - $precisionAsFloat)) / 200),
+                new DoubleTag("", $aimPos->getZ() + rand(-(100 - $precisionAsFloat), (100 - $precisionAsFloat)) / 200)
             ]),
             "Rotation" => new ListTag("Rotation", [
                 new FloatTag("", $player->getYaw()),
