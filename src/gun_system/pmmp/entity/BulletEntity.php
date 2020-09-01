@@ -38,7 +38,7 @@ class BulletEntity extends Projectile
         foreach ($players as $player) {
             if ($player !== null || $this->getOwningEntity() !== null) {
                 $distance = $blockHit->distance($player->getPosition());
-                if ($distance <= 2) {
+                if ($distance <= 3) {
                     PlaySoundsService::play($player,BulletSounds::BulletHitBlock());
                     $attacker = $this->getOwningEntity();
                     if($attacker instanceof Player){
