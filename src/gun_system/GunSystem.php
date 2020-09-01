@@ -64,8 +64,8 @@ class GunSystem
         return false;
     }
 
-    static function giveScare(Player $player) {
-        GiveScareService::execute(self::$scheduler, $player);
+    static function giveScare(Player $player, int $tick) {
+        GiveScareService::execute(self::$scheduler, $player, $tick);
     }
 
     static function sendHitMessage(Player $attacker, bool $isFinisher) {

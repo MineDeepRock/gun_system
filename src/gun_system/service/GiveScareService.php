@@ -12,11 +12,11 @@ use pocketmine\scheduler\TaskScheduler;
 
 class GiveScareService
 {
-    static function execute(TaskScheduler $scheduler,Player $player) {
+    static function execute(TaskScheduler $scheduler, Player $player, int $tick) {
         $scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($player) : void {
             if ($player->isOnline()) {
                 $player->addEffect(new EffectInstance(Effect::getEffect(Effect::NIGHT_VISION), 5, 1));
             }
-        }), 20 * 5);
+        }), $tick);
     }
 }
