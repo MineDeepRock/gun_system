@@ -1,7 +1,7 @@
 <?php
 
 
-namespace gun_system\pmmp\service;
+namespace gun_system\service;
 
 
 use gun_system\model\Gun;

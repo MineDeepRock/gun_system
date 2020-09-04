@@ -6,7 +6,7 @@ namespace gun_system;
 
 use gun_system\model\Gun;
 use gun_system\pmmp\item\ItemGun;
-use gun_system\pmmp\service\GenerateGunDescriptionService;
+use gun_system\service\GenerateGunDescriptionService;
 use gun_system\service\GiveScareService;
 use gun_system\service\LoadGunDataService;
 use pocketmine\level\Level;
