@@ -1,10 +1,10 @@
 <?php
 
 
-namespace gun_system\model\reloading;
+namespace gun_system\model\reloading_data;
 
 
-class Clip extends ReloadingData
+class ClipReloadingData extends ReloadingData
 {
     private $clipCapacity;
     private $secondOfClip;

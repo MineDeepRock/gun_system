@@ -26,11 +26,11 @@ class GunSystem
     }
 
     static function loadAllGuns(): array {
-        return LoadGunDataService::getAll();
+        return LoadGunDataService::getAll(self::$scheduler);
     }
 
     static function findGunByName(string $name): Gun {
-        return LoadGunDataService::findByName($name);
+        return LoadGunDataService::findByName(self::$scheduler, $name);
     }
 
     static function getItemGun(string $name): ItemGun {

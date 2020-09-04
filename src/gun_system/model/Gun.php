@@ -12,11 +12,28 @@ use gun_system\model\performance\FiringRate;
 use gun_system\model\performance\OverheatingRate;
 use gun_system\model\performance\Precision;
 use gun_system\model\performance\Reaction;
-use gun_system\model\reloading\MagazineData;
-use gun_system\model\reloading\ReloadingData;
+use gun_system\model\reloading\ClipReloading;
+use gun_system\model\reloading\MagazineReloading;
+use gun_system\model\reloading\OneByOneReloading;
+use gun_system\model\reloading_data\ClipReloadingData;
+use gun_system\model\reloading_data\MagazineReloadingData;
+use gun_system\model\reloading_data\OneByOneReloadingData;
+use gun_system\model\reloading_data\ReloadingData;
+use gun_system\pmmp\service\PlaySoundsService;
+use gun_system\pmmp\service\SendMessageService;
+use gun_system\pmmp\service\ShootingService;
+use gun_system\pmmp\sounds\OtherGunSounds;
+use pocketmine\Player;
+use pocketmine\scheduler\TaskScheduler;
 
 class Gun
 {
+
+    /**
+     * @var TaskScheduler
+     */
+    private $scheduler;
+
     /**
      * @var GunType
      */
@@ -56,7 +73,7 @@ class Gun
      */
     private $overheatRate;
     /**
-     * @var MagazineData
+     * @var Magazine
      */
     private $magazineData;
     /**
@@ -77,7 +94,22 @@ class Gun
      */
     private $scope;
 
-    public function __construct(GunType $type, string $name, AttackPoint $attackPoint, FiringRate $firingRate, BulletSpeed $bulletSpeed, Reaction $reaction, DamageGraph $damageGraph, Precision $precision, OverheatingRate $overheatRate, MagazineData $magazineData, int $initialAmmo, int $remainingAmmo, ReloadingData $reloadingType, Scope $scope) {
+    /**
+     * @var Shooting
+     */
+    private $shooting;
+    /**
+     * @var Overheat
+     */
+    private $overheat;
+    /**
+     * @var ClipReloading|MagazineReloading|OneByOneReloading
+     */
+    private $reloading;
+
+    public function __construct(TaskScheduler $taskScheduler, GunType $type, string $name, AttackPoint $attackPoint, FiringRate $firingRate, BulletSpeed $bulletSpeed, Reaction $reaction, DamageGraph $damageGraph, Precision $precision, OverheatingRate $overheatRate, Magazine $magazineData, int $initialAmmo, int $remainingAmmo, ReloadingData $reloadingData, Scope $scope) {
+        $this->scheduler = $taskScheduler;
+
         $this->type = $type;
         $this->name = $name;
 
@@ -93,10 +125,85 @@ class Gun
         $this->initialAmmo = $initialAmmo;
         $this->remainingAmmo = $remainingAmmo;
 
-        $this->reloadingData = $reloadingType;
+        $this->reloadingData = $reloadingData;
 
         $this->scope = $scope;
 
+
+        $this->overheat = new Overheat($taskScheduler, $this->overheatRate,
+            function (Player $player) {
+                $player->sendTip("オーバーヒート");
+                $this->cancelShooting();
+                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
+            },
+            function (Player $player) {
+                SendMessageService::sendBulletCount($player, $this->magazineData->getCurrentAmmo(), $this->remainingAmmo);
+                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGReady());
+            });
+
+        if ($reloadingData instanceof MagazineReloadingData) {
+            $this->reloading = new MagazineReloading($this->magazineData, $this->reloadingData);
+        } else if ($reloadingData instanceof ClipReloadingData) {
+            $this->reloading = new ClipReloading($this->magazineData, $reloadingData);
+        } else if ($reloadingData instanceof OneByOneReloadingData) {
+            $this->reloading = new OneByOneReloading($this->magazineData, $reloadingData);
+        }
+
+        $this->shooting = new Shooting(
+            $this->scheduler,
+            $this->type,
+            $this->magazineData,
+            $this->firingRate,
+            $this->precision,
+            $this->bulletSpeed,
+            $this->reaction,
+            function (Player $player) : void {
+                $this->overheat->raise($this->overheatRate, $player);
+                SendMessageService::sendBulletCount($player, $this->magazineData->getCurrentAmmo(), $this->remainingAmmo);
+            }
+        );
+    }
+
+    public function onCoolTime(): bool {
+        return $this->shooting->isOnCoolTime();
+    }
+
+    public function isOverheated(): bool {
+        return $this->overheat->isOverheated();
+    }
+
+    public function isReloading(): bool {
+        return $this->reloading->isReloading();
+    }
+
+    public function cancelReloading(): void {
+        $this->reloading->cancel();
+    }
+
+    public function reload(Player $player, int $inventoryAmmoAmount): void {
+        $reduceBulletFunc = function ($value) use ($player): int {
+            $this->remainingAmmo -= $value;
+            SendMessageService::sendBulletCount($player, $this->getMagazineData()->getCurrentAmmo(), $this->remainingAmmo);
+            return $this->remainingAmmo;
+        };
+
+        $this->reloading->execute($player, $this->scheduler, $inventoryAmmoAmount, $reduceBulletFunc);
+    }
+
+    public function cancelShooting(): void {
+        $this->shooting->cancelShooting();
+    }
+
+    public function delayShoot(Player $player, int $second) {
+        $this->shooting->delayShoot($player, $second);
+    }
+
+    public function shootOnce(Player $player): void {
+        $this->shooting->shootOnce($player);
+    }
+
+    public function shoot(Player $player): void {
+        $this->shooting->shoot($player);
     }
 
     /**
@@ -163,9 +270,9 @@ class Gun
     }
 
     /**
-     * @return MagazineData
+     * @return Magazine
      */
-    public function getMagazineData(): MagazineData {
+    public function getMagazineData(): Magazine {
         return $this->magazineData;
     }
 

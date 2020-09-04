@@ -1,10 +1,10 @@
 <?php
 
 
-namespace gun_system\model\reloading;
+namespace gun_system\model;
 
 
-class MagazineData
+class Magazine
 {
     private $currentAmmo;
     private $capacity;

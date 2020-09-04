@@ -1,10 +1,10 @@
 <?php
 
 
-namespace gun_system\model\reloading;
+namespace gun_system\model\reloading_data;
 
 
-class OneByOne extends ReloadingData
+class OneByOneReloadingData extends ReloadingData
 {
     private $second;
 

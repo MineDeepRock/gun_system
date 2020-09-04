@@ -1,31 +1,37 @@
 <?php
 
 
-namespace gun_system\controller;
+namespace gun_system\model;
 
 
 use Closure;
 use gun_system\model\performance\OverheatingRate;
+use gun_system\pmmp\service\PlaySoundsService;
+use gun_system\pmmp\sounds\OtherGunSounds;
 use pocketmine\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
-class OverheatingController
+class Overheat
 {
-    private $gauge = 0;
-    private $isOverheat = false;
-
-    private $onOverheat;
-    private $onFinished;
+    private $gauge;
+    private $rate;
+    private $isOverheated;
 
     private $scheduler;
     private $handler;
 
-    public function __construct(TaskScheduler $scheduler, Closure $onOverheat, Closure $onFinished) {
-        $this->onOverheat = $onOverheat;
-        $this->onFinished = $onFinished;
 
+    private $onOverheated;
+    private $onCooled;
+
+    public function __construct(TaskScheduler $scheduler, OverheatingRate $rate, Closure $onOverheated, Closure $onCooled) {
+        $this->gauge = 0;
+        $this->rate = $rate;
+        $this->isOverheated = false;
         $this->scheduler = $scheduler;
+        $this->onOverheated = $onOverheated;
+        $this->onCooled = $onCooled;
     }
 
     public function raise(OverheatingRate $rate, Player $player): void {
@@ -35,19 +41,17 @@ class OverheatingController
             }
         }
 
-        if ($rate->getPerShoot() === 0)
-            return;
+        if ($rate->getPerShoot() === 0) return;
 
         $this->gauge += $rate->getPerShoot();
         if ($this->gauge >= 100) {
-            $this->isOverheat = true;
-            ($this->onOverheat)($player);
+            $this->isOverheated = true;
+            ($this->onOverheated)($player);
 
             $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
                 if ($player->isOnline()) {
-                    $this->isOverheat = false;
-                    ($this->onFinished)($player);
-                    $this->reset();
+                    $this->isOverheated = false;
+                    $this->reset($player);
                 }
             }), 20 * 3);
         }
@@ -57,20 +61,27 @@ class OverheatingController
         }), 20 * 2);
     }
 
+
+    public function onOverheated(Player $player) {
+        $player->sendTip("オーバーヒート");
+        PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
+    }
+
     public function down(int $value): void {
         $this->gauge -= $value;
         if ($this->gauge < 0)
             $this->gauge = 0;
     }
 
-    public function reset(): void {
+    public function reset(Player $player): void {
         $this->gauge = 0;
+        ($this->onCooled)($player);
     }
 
     /**
      * @return bool
      */
-    public function isOverheat(): bool {
-        return $this->isOverheat;
+    public function isOverheated(): bool {
+        return $this->isOverheated;
     }
 }

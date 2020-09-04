@@ -1,30 +1,28 @@
 <?php
 
 
-namespace gun_system\controller;
+namespace gun_system\model\reloading;
 
 
 use Closure;
-use gun_system\model\reloading\Clip;
-use gun_system\model\reloading\MagazineData;
-use gun_system\pmmp\sounds\ReloadingSounds;
+use gun_system\model\Magazine;
+use gun_system\model\reloading_data\ClipReloadingData;
 use gun_system\pmmp\service\PlaySoundsService;
+use gun_system\pmmp\sounds\ReloadingSounds;
 use pocketmine\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
-class ClipReloadingController extends ReloadingController
+class ClipReloading extends Reloading
 {
-    protected $isCancelable = true;
-    
     private $clipReloadTaskHandler;
     private $oneReloadTaskHandler;
     /**
-     * @var Clip
+     * @var ClipReloadingData
      */
     protected $reloadingData;
 
-    public function __construct(MagazineData $magazineData, Clip $reloadingData) {
+    public function __construct(Magazine $magazineData, ClipReloadingData $reloadingData) {
         parent::__construct($magazineData, $reloadingData);
     }
 

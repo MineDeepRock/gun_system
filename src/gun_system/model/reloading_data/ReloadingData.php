@@ -1,7 +1,7 @@
 <?php
 
 
-namespace gun_system\model\reloading;
+namespace gun_system\model\reloading_data;
 
 
 abstract class ReloadingData

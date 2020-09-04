@@ -1,21 +1,19 @@
 <?php
 
 
-namespace gun_system\controller;
+namespace gun_system\model\reloading;
 
 
 use Closure;
-use gun_system\model\reloading\OneByOne;
-use gun_system\pmmp\sounds\ReloadingSounds;
+use gun_system\model\reloading_data\OneByOneReloadingData;
 use gun_system\pmmp\service\PlaySoundsService;
+use gun_system\pmmp\sounds\ReloadingSounds;
 use pocketmine\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
-class OneByOneReloadingController extends ReloadingController
+class OneByOneReloading extends Reloading
 {
-    protected $isCancelable = true;
-
     private $oneReloadTaskHandler;
 
     public function cancel(): void {
@@ -27,7 +25,7 @@ class OneByOneReloadingController extends ReloadingController
     public function execute(Player $player, TaskScheduler $scheduler, int $inventoryAmmoAmount, Closure $onSucceed): void {
         $this->onReloading = true;
 
-        if ($this->reloadingData instanceof OneByOne) {
+        if ($this->reloadingData instanceof OneByOneReloadingData) {
             $this->oneReloadTaskHandler = $scheduler->scheduleDelayedRepeatingTask(new ClosureTask(function (int $currentTick) use ($player, $inventoryAmmoAmount, $onSucceed): void {
                 PlaySoundsService::play($player, ReloadingSounds::ReloadOne());
                 $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() + 1);

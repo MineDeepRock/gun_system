@@ -1,10 +1,10 @@
 <?php
 
 
-namespace gun_system\model\reloading;
+namespace gun_system\model\reloading_data;
 
 
-class Magazine extends ReloadingData {
+class MagazineReloadingData extends ReloadingData {
     private $second;
 
     public function __construct(float $second) {

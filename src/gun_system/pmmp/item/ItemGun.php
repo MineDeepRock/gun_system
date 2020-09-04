@@ -4,21 +4,9 @@
 namespace gun_system\pmmp\item;
 
 
-use gun_system\controller\ClipReloadingController;
-use gun_system\controller\MagazineReloadingController;
-use gun_system\controller\OneByOneReloadingController;
-use gun_system\controller\OverheatingController;
-use gun_system\controller\ReloadingController;
-use gun_system\controller\ShootingController;
 use gun_system\model\Gun;
 use gun_system\model\GunType;
-use gun_system\model\reloading\Clip;
-use gun_system\model\reloading\Magazine;
-use gun_system\model\reloading\OneByOne;
-use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\service\SendMessageService;
-use gun_system\pmmp\service\ShootingService;
-use gun_system\pmmp\sounds\OtherGunSounds;
 use pocketmine\item\ItemIds;
 use pocketmine\item\Tool;
 use pocketmine\Player;
@@ -30,47 +18,9 @@ class ItemGun extends Tool
 
     private $gun;
 
-    /**
-     * @var ReloadingController
-     */
-    private $reloadingController;
-
-    /**
-     * @var ShootingController
-     */
-    private $shootingController;
-
-    /**
-     * @var OverheatingController
-     */
-    private $overheatingController;
-
     public function __construct(Gun $gun, TaskScheduler $scheduler) {
         $this->gun = $gun;
         $this->scheduler = $scheduler;
-
-        $reloadingData = $gun->getReloadingData();
-        if ($reloadingData instanceof Magazine) {
-            $this->reloadingController = new MagazineReloadingController($this->gun->getMagazineData(), $reloadingData);
-        } else if ($reloadingData instanceof Clip) {
-            $this->reloadingController = new ClipReloadingController($this->gun->getMagazineData(), $reloadingData);
-        } else if ($reloadingData instanceof OneByOne) {
-            $this->reloadingController = new OneByOneReloadingController($this->gun->getMagazineData(), $reloadingData);
-        }
-
-        $this->shootingController = new ShootingController($this->scheduler, $this->gun->getType(), $this->gun->getFiringRate(), $this->gun->getMagazineData());
-
-        //TODO:リファクタリング
-        $this->overheatingController = new OverheatingController($this->scheduler,
-            function (Player $player) {
-                $player->sendTip("オーバーヒート");
-                $this->shootingController->cancelShooting();
-                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
-            },
-            function (Player $player) {
-                SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
-                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGReady());
-            });
 
         parent::__construct(ItemIds::BOW, 0, $this->gun->getName());
         $this->setUnbreakable(true);
@@ -88,20 +38,19 @@ class ItemGun extends Tool
             $this->shootOnce($player);
             $player->getInventory()->sendContents($player);
         } else {
-            $this->shootingController->cancelShooting();
+            $this->gun->cancelShooting();
             $player->getInventory()->sendContents($player);
         }
         return false;
     }
 
     public function shoot(Player $player): void {
-        if ($this->reloadingController->isReloading()) {
-            if ($this->reloadingController->isCancelable()) {
-                $this->reloadingController->cancel();
-            } else {
-                SendMessageService::sendReloadingMessage($player);
+        if ($this->gun->isReloading()) {
+            if ($this->gun->getMagazineData()->isEmpty()) {
+                $this->reload($player);
                 return;
             }
+            $this->gun->cancelReloading();
         }
 
         if ($this->gun->getMagazineData()->isEmpty()) {
@@ -109,41 +58,32 @@ class ItemGun extends Tool
             return;
         }
 
-        if ($this->overheatingController->isOverheat()) {
+        if ($this->gun->isOverheated()) {
             SendMessageService::sendOverheatingMessage($player);
             return;
         }
 
-        if ($this->shootingController->onCoolTime()) {
+        if ($this->gun->onCoolTime()) {
             //TODO: 1/rate - (now-lastShootDate)
-            $this->shootingController->delayShoot(1 / $this->gun->getFiringRate()->getPerSecond(), function () use ($player): void {
-                ShootingService::execute($this->scheduler, $player, $this->gun);
-            });
+            $this->gun->delayShoot($player, 1 / $this->gun->getFiringRate()->getPerSecond());
             SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
             return;
         }
 
         if ($this->gun->getType()->equals(GunType::LMG()) && !$player->isSneaking()) {
-            $this->shootingController->delayShoot(1 / $this->gun->getFiringRate()->getPerSecond(), function () use ($player): void {
-                ShootingService::execute($this->scheduler, $player, $this->gun);
-            });
+            $this->gun->delayShoot($player, 1 / $this->gun->getFiringRate()->getPerSecond());
         }
 
-        $this->shootingController->shoot(function () use ($player): void {
-            ShootingService::execute($this->scheduler, $player, $this->gun);
-            $this->overheatingController->raise($this->gun->getOverheatRate(), $player);
-            SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
-        });
+        $this->gun->shoot($player);
     }
 
     public function shootOnce(Player $player): void {
-        if ($this->reloadingController->isReloading()) {
-            if ($this->reloadingController->isCancelable()) {
-                $this->reloadingController->cancel();
-            } else {
-                SendMessageService::sendReloadingMessage($player);
+        if ($this->gun->isReloading()) {
+            if ($this->gun->getMagazineData()->isEmpty()) {
+                $this->reload($player);
                 return;
             }
+            $this->gun->cancelReloading();
         }
 
         if ($this->gun->getMagazineData()->isEmpty()) {
@@ -151,24 +91,20 @@ class ItemGun extends Tool
             return;
         }
 
-        if ($this->shootingController->onCoolTime()) {
+        if ($this->gun->onCoolTime()) {
             return;
         }
 
-        if ($this->overheatingController->isOverheat()) {
+        if ($this->gun->isOverheated()) {
             SendMessageService::sendOverheatingMessage($player);
             return;
         }
 
-        $this->shootingController->shootOnce(function () use ($player): void {
-            ShootingService::execute($this->scheduler, $player, $this->gun);
-            $this->overheatingController->raise($this->gun->getOverheatRate(), $player);
-            SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
-        });
+        $this->gun->shootOnce($player);
     }
 
     public function reload($player): void {
-        if ($this->reloadingController->isReloading()) {
+        if ($this->gun->isReloading()) {
             SendMessageService::sendReloadingMessage($player);
             return;
         }
@@ -183,25 +119,19 @@ class ItemGun extends Tool
             return;
         }
 
-        if ($this->overheatingController->isOverheat()) {
+        if ($this->gun->isOverheated()) {
             SendMessageService::sendOverheatingMessage($player);
             return;
         }
 
-        $this->shootingController->cancelShooting();
+        $this->gun->cancelShooting();
 
-        $reduceBulletFunc = function ($value) use ($player): int {
-            $this->gun->setRemainingAmmo($this->gun->getRemainingAmmo() - $value);
-            SendMessageService::sendBulletCount($player, $this->gun->getMagazineData()->getCurrentAmmo(), $this->gun->getRemainingAmmo());
-            return $this->gun->getRemainingAmmo();
-        };
-
-        $this->reloadingController->execute($player, $this->scheduler, $this->gun->getRemainingAmmo(), $reduceBulletFunc);
+        $this->gun->reload($player, $this->gun->getRemainingAmmo());
 
     }
 
     public function cancelReloading(): void {
-        $this->reloadingController->cancel();
+        $this->gun->cancelReloading();
     }
 
     /**
