@@ -78,8 +78,7 @@ class Shooting
             $this->delayShootingTaskHandler->cancel();
     }
 
-    public function delayShoot(Player $player, int $second) {
-        var_dump("delay:{$second}");
+    public function delayShoot(Player $player, float $second) {
         $this->delayShootingTaskHandler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
             $this->shoot($player);
         }), 20 * $second);

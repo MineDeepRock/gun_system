@@ -194,7 +194,7 @@ class Gun
         $this->shooting->cancelShooting();
     }
 
-    public function delayShoot(Player $player, int $second) {
+    public function delayShoot(Player $player, float $second) {
         $this->shooting->delayShoot($player, $second);
     }
 
