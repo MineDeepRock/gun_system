@@ -1,5 +1,5 @@
 {
-  "name": "suinua/gun_system",
+  "name": "mine_deep_rock/gun_system",
   "authors": [
     {
       "name": "suinua"
@@ -12,44 +12,8 @@
       ]
     }
   },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/PocketMine-MP"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/RakLib"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/SPL"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/BinaryUtils"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/NBT"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/Math"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/pmmp/Snooze"
-    }
-  ],
   "require": {
-    "pocketmine/pocketmine-mp": "3.14.2",
-    "pocketmine/raklib": "*",
-    "pocketmine/spl": "*",
-    "pocketmine/binaryutils": "*",
-    "pocketmine/nbt": "*",
-    "pocketmine/math": "*",
-    "pocketmine/snooze": "*",
+    "pocketmine/pocketmine-mp": "*",
     "ext-gd": "*",
     "ext-json": "*"
   }
