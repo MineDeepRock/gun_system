@@ -2,16 +2,19 @@
 
 namespace gun_system\pmmp\entity;
 
+use gun_system\pmmp\event\BulletHitBlockEvent;
 use gun_system\pmmp\event\BulletHitEvent;
 use gun_system\pmmp\event\BulletHitNearEvent;
 use gun_system\pmmp\sounds\BulletSounds;
 use gun_system\service\CalculateDamageService;
 use gun_system\pmmp\service\PlaySoundsService;
 use pocketmine\block\Block;
+use pocketmine\block\Redstone;
 use pocketmine\entity\Entity;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\level\Level;
+use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\level\particle\ExplodeParticle;
 use pocketmine\math\RayTraceResult;
 use pocketmine\nbt\tag\CompoundTag;
@@ -31,6 +34,12 @@ class BulletEntity extends Projectile
     }
 
     protected function onHitBlock(Block $blockHit, RayTraceResult $hitResult): void {
+        $shooter = $this->getOwningEntity();
+        if ($shooter instanceof Player) {
+            $bulletHitBlockEvent = new BulletHitBlockEvent($shooter, $blockHit);
+            $bulletHitBlockEvent->call();
+        }
+
         $blockHit->getLevel()->addParticle(new ExplodeParticle($blockHit));
 
         $players = Server::getInstance()->getOnlinePlayers();
@@ -39,14 +48,14 @@ class BulletEntity extends Projectile
             if ($player !== null || $this->getOwningEntity() !== null) {
                 $distance = $blockHit->distance($player->getPosition());
                 if ($distance <= 3) {
-                    PlaySoundsService::play($player,BulletSounds::BulletHitBlock());
+                    PlaySoundsService::play($player, BulletSounds::BulletHitBlock());
                     $attacker = $this->getOwningEntity();
-                    if($attacker instanceof Player){
+                    if ($attacker instanceof Player) {
                         $event = new BulletHitNearEvent($attacker, $player);
                         $event->call();
                     }
                 } else if ($distance <= 10) {
-                    PlaySoundsService::play($player,BulletSounds::BulletFly());
+                    PlaySoundsService::play($player, BulletSounds::BulletFly());
                 }
             }
         }
@@ -63,6 +72,8 @@ class BulletEntity extends Projectile
         $attacker = $this->getOwningEntity();
 
         if ($attacker instanceof Player) {
+            $victim->getLevel()->addParticle(new DestroyBlockParticle($victim->asVector3()->add(0, 1, 0), new Redstone()));
+
             $damage = CalculateDamageService::execute($attacker, $victim);
             $event = new BulletHitEvent($attacker, $victim, $damage);
             $event->call();

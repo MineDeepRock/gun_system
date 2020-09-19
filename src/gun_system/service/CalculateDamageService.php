@@ -8,12 +8,13 @@ use gun_system\pmmp\item\ItemGun;
 use pocketmine\block\Redstone;
 use pocketmine\entity\Entity;
 use pocketmine\level\particle\DestroyBlockParticle;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class CalculateDamageService
 {
-    static function execute(?Player $attacker, Entity $entity): float {
+    static function execute(?Player $attacker, Vector3 $targetVector): float {
         if ($attacker !== null) {
 
             $attackerPos = new Vector3(
@@ -21,20 +22,8 @@ class CalculateDamageService
                 $attacker->getY(),
                 $attacker->getZ()
             );
-            $entityPo = new Vector3(
-                $entity->getX(),
-                $entity->getY(),
-                $entity->getZ()
-            );
 
-            $distance = $attackerPos->distance($entityPo);
-
-            $entity->getLevel()->addParticle(new DestroyBlockParticle(new Vector3(
-                $entity->getX(),
-                $entity->getY() + 1,
-                $entity->getZ()
-            ), new Redstone()));
-
+            $distance = $attackerPos->distance($targetVector);
             $itemGun = $attacker->getInventory()->getItemInHand();
             if ($itemGun instanceof ItemGun) {
                 $gun = $itemGun->getGun();
