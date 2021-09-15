@@ -6,8 +6,9 @@ namespace gun_system\listener;
 use gun_system\model\GunType;
 use gun_system\pmmp\item\ItemGun;
 use gun_system\service\LoadGunDataService;
-use pocketmine\entity\Effect;
-use pocketmine\entity\EffectInstance;
+use pocketmine\block\VanillaBlocks;
+use pocketmine\entity\effect\EffectInstance;
+use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
@@ -17,10 +18,9 @@ use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
-use pocketmine\math\Vector3;
+use pocketmine\item\VanillaItems;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\TaskScheduler;
 
 class GunListener implements Listener
@@ -33,7 +33,7 @@ class GunListener implements Listener
 
     public function tryShootingOnce(Player $player, Item $item): void {
         if ($item instanceof ItemGun) {
-            if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
+            if (!$player->getInventory()->contains(VanillaItems::ARROW())) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
             } else {
                 $item->shootOnce($player);
@@ -43,7 +43,7 @@ class GunListener implements Listener
 
     public function tryShooting(Player $player, Item $item): void {
         if ($item instanceof ItemGun) {
-            if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
+            if (!$player->getInventory()->contains(VanillaItems::ARROW())) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
             } else if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
                 $item->aim();
@@ -53,26 +53,27 @@ class GunListener implements Listener
         }
     }
 
+    //todo
     //GunSystem
     //空中を右クリック,Tapで一発だけ射撃
-    public function onTapAir(DataPacketReceiveEvent $event) {
-        $packet = $event->getPacket();
-        if ($packet instanceof LevelSoundEventPacket) {
-            if ($packet->sound === LevelSoundEventPacket::SOUND_ATTACK_NODAMAGE) {
-                $player = $event->getPlayer();
-                $item = $event->getPlayer()->getInventory()->getItemInHand();
-                $this->tryShootingOnce($player, $item);
-            }
-        }
-    }
+    //public function onTapAir(DataPacketReceiveEvent $event) {
+    //    $packet = $event->getPacket();
+    //    if ($packet instanceof LevelSoundEventPacket) {
+    //        if ($packet->sound === LevelSoundEventPacket::SOUND_ATTACK_NODAMAGE) {
+    //            $player = $event->getOrigin()->getPlayer();
+    //            $item = $event->getOrigin()->getPlayer()->getInventory()->getItemInHand();
+    //            $this->tryShootingOnce($player, $item);
+    //        }
+    //    }
+    //}
 
     //空中を右クリックwin10,tap長押しで射撃
     public function onClickAir(PlayerInteractEvent $event) {
-        if (in_array($event->getAction(), [PlayerInteractEvent::RIGHT_CLICK_AIR])) {
+        //if ($event->getAction() === PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             $player = $event->getPlayer();
             $item = $event->getItem();
             $this->tryShooting($player, $item);
-        }
+        //}
     }
 
     //エンティティをなぐるで一発だけ射撃
@@ -95,7 +96,7 @@ class GunListener implements Listener
             $item = $action->getTargetItem();
 
             if (file_exists(LoadGunDataService::PATH . $item->getName() . ".json")) {
-                $event->setCancelled();
+                $event->cancel();
             }
         }
     }
@@ -118,11 +119,7 @@ class GunListener implements Listener
     public function onTapNearBlock(PlayerInteractEvent $event) {
         if (in_array($event->getAction(), [PlayerInteractEvent::RIGHT_CLICK_BLOCK])) {
             $player = $event->getPlayer();
-            $touchedBlockPos = new Vector3(
-                $event->getBlock()->getX(),
-                $event->getBlock()->getY(),
-                $event->getBlock()->getZ()
-            );
+            $touchedBlockPos = $event->getBlock()->getPosition();
             if ($player->getPosition()->distance($touchedBlockPos) < 3) {
                 $item = $event->getItem();
                 if ($item instanceof ItemGun) {
@@ -136,13 +133,13 @@ class GunListener implements Listener
         $player = $event->getPlayer();
         $item = $player->getInventory()->getItemInHand();
         if ($player->isSneaking()) {
-            $player->getArmorInventory()->removeItem(ItemFactory::get(Item::PUMPKIN));
-            $player->removeEffect(Effect::SLOWNESS);
+            $player->getArmorInventory()->removeItem(VanillaBlocks::CARVED_PUMPKIN()->asItem());
+            $player->getEffects()->remove(VanillaEffects::SLOWNESS());
         } else if ($item instanceof ItemGun) {
             $effectLevel = $item->getGun()->getScope()->getMagnification();
-            $player->addEffect(new EffectInstance(Effect::getEffect(Effect::SLOWNESS), null, $effectLevel, false));
+            $player->getEffects()->add(new EffectInstance(VanillaEffects::SLOWNESS(), null, $effectLevel, false));
             if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
-                $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
+                $player->getArmorInventory()->setHelmet(VanillaBlocks::CARVED_PUMPKIN()->asItem());
             }
         }
     }

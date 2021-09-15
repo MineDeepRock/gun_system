@@ -5,10 +5,10 @@ namespace gun_system\pmmp\service;
 
 
 use gun_system\model\GunSound;
-use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
-use pocketmine\Player;
+use pocketmine\player\Player;
+use pocketmine\world\World;
 
 class PlaySoundsService
 {
@@ -22,10 +22,10 @@ class PlaySoundsService
         $packet->volume = $sound->getVolume();
         $packet->pitch = $sound->getPitch();
         $packet->soundName = $sound->getName();
-        $target->sendDataPacket($packet);
+        $target->getNetworkSession()->sendDataPacket($packet);
     }
 
-    static function playAround(Level $level, Vector3 $pos, GunSound $sound, float $distance = null): void {
+    static function playAround(World $level, Vector3 $pos, GunSound $sound, float $distance = null): void {
         $players = $level->getPlayers();
 
         foreach ($players as $player) {

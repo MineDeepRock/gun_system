@@ -8,7 +8,7 @@ use Closure;
 use gun_system\model\performance\OverheatingRate;
 use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\sounds\OtherGunSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -48,7 +48,7 @@ class Overheat
             $this->isOverheated = true;
             ($this->onOverheated)($player);
 
-            $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
+            $this->scheduler->scheduleDelayedTask(new ClosureTask(function () use ($player): void {
                 if ($player->isOnline()) {
                     $this->isOverheated = false;
                     $this->reset($player);
@@ -56,7 +56,7 @@ class Overheat
             }), 20 * 3);
         }
 
-        $this->handler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick): void {
+        $this->handler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (): void {
             $this->down(50);
         }), 20 * 2);
     }
@@ -64,7 +64,7 @@ class Overheat
 
     public function onOverheated(Player $player) {
         $player->sendTip("オーバーヒート");
-        PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
+        PlaySoundsService::playAround($player->getWorld(), $player->getPosition(), OtherGunSounds::LMGOverheat());
     }
 
     public function down(int $value): void {

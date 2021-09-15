@@ -9,29 +9,24 @@ use gun_system\pmmp\sounds\BulletSounds;
 use gun_system\service\CalculateDamageService;
 use gun_system\pmmp\service\PlaySoundsService;
 use pocketmine\block\Block;
-use pocketmine\block\Redstone;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Entity;
+use pocketmine\entity\EntitySizeInfo;
+use pocketmine\entity\projectile\Egg;
 use pocketmine\entity\projectile\Projectile;
 use pocketmine\event\entity\ProjectileHitEvent;
-use pocketmine\level\Level;
-use pocketmine\level\particle\DestroyBlockParticle;
-use pocketmine\level\particle\ExplodeParticle;
 use pocketmine\math\RayTraceResult;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\player\Player;
 use pocketmine\Server;
+use pocketmine\world\particle\BlockBreakParticle;
+use pocketmine\world\particle\ExplodeParticle;
 
 class BulletEntity extends Projectile
 {
-    public const NETWORK_ID = self::EGG;
-
     public $width = 0.05;
     public $height = 0.05;
     protected $gravity = 0;
-
-    public function __construct(Level $level, CompoundTag $nbt, ?Entity $shootingEntity = null) {
-        parent::__construct($level, $nbt, $shootingEntity);
-    }
 
     protected function onHitBlock(Block $blockHit, RayTraceResult $hitResult): void {
         $shooter = $this->getOwningEntity();
@@ -40,13 +35,13 @@ class BulletEntity extends Projectile
             $bulletHitBlockEvent->call();
         }
 
-        $blockHit->getLevel()->addParticle(new ExplodeParticle($blockHit));
+        $blockHit->getPosition()->getWorld()->addParticle($blockHit->getPosition(), new ExplodeParticle());
 
         $players = Server::getInstance()->getOnlinePlayers();
 
         foreach ($players as $player) {
             if ($player !== null || $this->getOwningEntity() !== null) {
-                $distance = $blockHit->distance($player->getPosition());
+                $distance = $blockHit->getPosition()->distance($player->getPosition());
                 if ($distance <= 3) {
                     PlaySoundsService::play($player, BulletSounds::BulletHitBlock());
                     $attacker = $this->getOwningEntity();
@@ -72,11 +67,15 @@ class BulletEntity extends Projectile
         $attacker = $this->getOwningEntity();
 
         if ($attacker instanceof Player) {
-            $victim->getLevel()->addParticle(new DestroyBlockParticle($victim->asVector3()->add(0, 1, 0), new Redstone()));
+            $victim->getWorld()->addParticle($victim->getPosition()->add(0, 1, 0), new BlockBreakParticle(VanillaBlocks::REDSTONE()));
 
-            $damage = CalculateDamageService::execute($attacker, $victim);
+            $damage = CalculateDamageService::execute($attacker, $victim->getPosition());
             $event = new BulletHitEvent($attacker, $victim, $damage);
             $event->call();
         }
     }
+
+
+    protected function getInitialSizeInfo() : EntitySizeInfo{ return new EntitySizeInfo(0.25, 0.25); }
+    public static function getNetworkTypeId() : string{ return EntityIds::EGG; }
 }

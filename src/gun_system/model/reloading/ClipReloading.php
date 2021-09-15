@@ -9,7 +9,7 @@ use gun_system\model\Magazine;
 use gun_system\model\reloading_data\ClipReloadingData;
 use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\sounds\ReloadingSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -43,7 +43,7 @@ class ClipReloading extends Reloading
 
             PlaySoundsService::play($player, ReloadingSounds::ClipPush());
             $this->clipReloadTaskHandler = $scheduler->scheduleDelayedRepeatingTask(
-                new ClosureTask(function (int $currentTick) use ($player, $scheduler, $inventoryAmmoAmount, $onSucceed): void {
+                new ClosureTask(function () use ($player, $scheduler, $inventoryAmmoAmount, $onSucceed): void {
                     $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() + $this->reloadingData->getClipCapacity());
 
                     $inventoryAmmoAmount = $onSucceed($this->reloadingData->getClipCapacity());
@@ -67,7 +67,7 @@ class ClipReloading extends Reloading
         if ($this->magazineData->getCurrentAmmo() !== $this->magazineData->getCapacity()) {
 
             $this->oneReloadTaskHandler = $scheduler->scheduleDelayedRepeatingTask(
-                new ClosureTask(function (int $currentTick) use ($player, $inventoryAmmoAmount, $onSucceed): void {
+                new ClosureTask(function () use ($player, $inventoryAmmoAmount, $onSucceed): void {
                     PlaySoundsService::play($player, ReloadingSounds::ReloadOne());
 
                     $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() + 1);

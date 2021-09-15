@@ -6,7 +6,7 @@ namespace gun_system\pmmp\service;
 
 use gun_system\model\performance\Reaction;
 use pocketmine\math\Vector3;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class GiveReactService
 {

@@ -9,13 +9,13 @@ use gun_system\pmmp\item\ItemGun;
 use gun_system\service\GenerateGunDescriptionService;
 use gun_system\service\GiveScareService;
 use gun_system\service\LoadGunDataService;
-use pocketmine\level\Level;
-use pocketmine\level\particle\FloatingTextParticle;
-use pocketmine\level\Position;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\particle\FloatingTextParticle;
+use pocketmine\world\Position;
+use pocketmine\world\World;
 
 class GunSystem
 {
@@ -76,7 +76,7 @@ class GunSystem
         }
     }
 
-    static function sendHitParticle(Level $level, Position $position, float $value, bool $isFinisher) {
+    static function sendHitParticle(World $world, Position $position, float $value, bool $isFinisher) {
         if ($isFinisher) {
             $text = str_repeat(TextFormat::RED . "■", intval($value));
         } else if ($value <= 5) {
@@ -89,11 +89,11 @@ class GunSystem
 
         $position = $position->add(rand(-2, 2), rand(0, 3), rand(-2, 2));
         $particle = new FloatingTextParticle($position, $text, "");
-        $level->addParticle($particle);
+        $world->addParticle($position, $particle);
 
-        self::$scheduler->scheduleDelayedTask(new ClosureTask(function (int $tick) use ($level, $particle): void {
+        self::$scheduler->scheduleDelayedTask(new ClosureTask(function () use ($position, $world, $particle): void {
             $particle->setInvisible(true);
-            $level->addParticle($particle);
+            $world->addParticle($position, $particle);
         }), 20 * 1.5);
     }
 

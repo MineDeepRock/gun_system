@@ -23,7 +23,7 @@ use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\service\SendMessageService;
 use gun_system\pmmp\service\ShootingService;
 use gun_system\pmmp\sounds\OtherGunSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\TaskScheduler;
 
 class Gun
@@ -134,11 +134,11 @@ class Gun
             function (Player $player) {
                 $player->sendTip("オーバーヒート");
                 $this->cancelShooting();
-                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGOverheat());
+                PlaySoundsService::playAround($player->getWorld(), $player->getPosition(), OtherGunSounds::LMGOverheat());
             },
             function (Player $player) {
                 SendMessageService::sendBulletCount($player, $this->magazineData->getCurrentAmmo(), $this->remainingAmmo);
-                PlaySoundsService::playAround($player->getLevel(), $player->getPosition(), OtherGunSounds::LMGReady());
+                PlaySoundsService::playAround($player->getWorld(), $player->getPosition(), OtherGunSounds::LMGReady());
             });
 
         if ($reloadingData instanceof MagazineReloadingData) {

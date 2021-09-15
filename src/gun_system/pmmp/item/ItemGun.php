@@ -7,12 +7,15 @@ namespace gun_system\pmmp\item;
 use gun_system\model\Gun;
 use gun_system\model\GunType;
 use gun_system\pmmp\service\SendMessageService;
+use pocketmine\item\ItemIdentifier;
 use pocketmine\item\ItemIds;
+use pocketmine\item\ItemUseResult;
+use pocketmine\item\Releasable;
 use pocketmine\item\Tool;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\TaskScheduler;
 
-class ItemGun extends Tool
+class ItemGun extends Tool implements Releasable
 {
     private $scheduler;
 
@@ -22,7 +25,7 @@ class ItemGun extends Tool
         $this->gun = $gun;
         $this->scheduler = $scheduler;
 
-        parent::__construct(ItemIds::BOW, 0, $this->gun->getName());
+        parent::__construct(new ItemIdentifier(ItemIds::BOW, 0), $this->gun->getName());
         $this->setUnbreakable(true);
         $this->setCustomName($this->gun->getName());
     }
@@ -33,15 +36,15 @@ class ItemGun extends Tool
 
     public function aim(): void { }
 
-    public function onReleaseUsing(Player $player): bool {
+    public function onReleaseUsing(Player $player): ItemUseResult {
         if ($this->gun->getType()->equals(GunType::SniperRifle())) {
             $this->shootOnce($player);
-            $player->getInventory()->sendContents($player);
         } else {
             $this->gun->cancelShooting();
-            $player->getInventory()->sendContents($player);
         }
-        return false;
+
+        $player->getInventory()->setContents($player->getInventory()->getContents());
+        return ItemUseResult::SUCCESS();
     }
 
     public function shoot(Player $player): void {

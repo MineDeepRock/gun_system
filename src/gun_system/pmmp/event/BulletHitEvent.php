@@ -4,7 +4,7 @@ namespace gun_system\pmmp\event;
 
 use pocketmine\entity\Entity;
 use pocketmine\event\Event;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class BulletHitEvent extends Event
 {

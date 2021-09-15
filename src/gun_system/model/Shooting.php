@@ -13,7 +13,7 @@ use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\service\SendMessageService;
 use gun_system\pmmp\service\ShootingService;
 use gun_system\pmmp\sounds\OtherGunSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -57,7 +57,7 @@ class Shooting
 
     private function setCoolTime(Player $player): void {
         $this->onCoolTime = true;
-        $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
+        $this->scheduler->scheduleDelayedTask(new ClosureTask(function () use ($player): void {
             if ($player === null) return;
             if ($player->isOnline()) {
                 if ($this->gunType->equals(GunType::SniperRifle())) {
@@ -79,7 +79,7 @@ class Shooting
     }
 
     public function delayShoot(Player $player, float $second) {
-        $this->delayShootingTaskHandler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
+        $this->delayShootingTaskHandler = $this->scheduler->scheduleDelayedTask(new ClosureTask(function () use ($player): void {
             $this->shoot($player);
         }), 20 * $second);
     }
@@ -101,7 +101,7 @@ class Shooting
             $this->delayShootingTaskHandler->cancel();
 
         $this->shootingTaskHandler = $this->scheduler->scheduleRepeatingTask(
-            new ClosureTask(function (int $currentTick) use ($player) : void {
+            new ClosureTask(function () use ($player) : void {
                 //TODO:あんまりよくない
                 $this->setCoolTime($player);
                 $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() - 1);

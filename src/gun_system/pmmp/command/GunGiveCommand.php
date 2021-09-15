@@ -7,13 +7,13 @@ namespace gun_system\pmmp\command;
 use gun_system\GunSystem;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class GunGiveCommand extends Command
 {
     public function __construct() {
-        parent::__construct("GunGive", "", "");
-        $this->setPermission("GunGive.Command");
+        parent::__construct("gungive", "", "");
+        $this->setPermission("gungive");
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args) {

@@ -7,7 +7,7 @@ namespace gun_system\model\reloading;
 use Closure;
 use gun_system\model\Magazine;
 use gun_system\model\reloading_data\ReloadingData;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\TaskScheduler;
 
 abstract class Reloading

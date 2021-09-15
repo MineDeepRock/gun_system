@@ -8,7 +8,7 @@ use Closure;
 use gun_system\model\reloading_data\OneByOneReloadingData;
 use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\sounds\ReloadingSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -26,7 +26,7 @@ class OneByOneReloading extends Reloading
         $this->onReloading = true;
 
         if ($this->reloadingData instanceof OneByOneReloadingData) {
-            $this->oneReloadTaskHandler = $scheduler->scheduleDelayedRepeatingTask(new ClosureTask(function (int $currentTick) use ($player, $inventoryAmmoAmount, $onSucceed): void {
+            $this->oneReloadTaskHandler = $scheduler->scheduleDelayedRepeatingTask(new ClosureTask(function () use ($player, $inventoryAmmoAmount, $onSucceed): void {
                 PlaySoundsService::play($player, ReloadingSounds::ReloadOne());
                 $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() + 1);
 

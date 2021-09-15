@@ -11,7 +11,7 @@ use gun_system\model\reloading_data\ReloadingData;
 use gun_system\pmmp\service\PlaySoundsService;
 use gun_system\pmmp\service\SendMessageService;
 use gun_system\pmmp\sounds\ReloadingSounds;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\scheduler\TaskScheduler;
 
@@ -36,7 +36,7 @@ class MagazineReloading extends Reloading
 
     public function execute(Player $player, TaskScheduler $scheduler, int $inventoryAmmoAmount, Closure $onSucceed): void {
         if ($this->reloadingData instanceof MagazineReloadingData) {
-            $this->messageHandler = $scheduler->scheduleRepeatingTask(new ClosureTask(function (int $tick) use ($player): void {
+            $this->messageHandler = $scheduler->scheduleRepeatingTask(new ClosureTask(function () use ($player): void {
                 $this->reloadingProgress += 0.1;
                 SendMessageService::sendReloadingProgress($player, $this->magazineData->getCapacity(), $this->reloadingProgress, $this->reloadingData->getSecond());
             }), 20 * 0.1);
@@ -46,7 +46,7 @@ class MagazineReloading extends Reloading
 
             PlaySoundsService::play($player, ReloadingSounds::MagazineOut());
             $this->handler = $scheduler->scheduleDelayedTask(new ClosureTask(
-                function (int $currentTick) use ($player, $empty, $inventoryAmmoAmount, $onSucceed): void {
+                function () use ($player, $empty, $inventoryAmmoAmount, $onSucceed): void {
                     if ($empty > $inventoryAmmoAmount) {
                         $this->magazineData->setCurrentAmmo($this->magazineData->getCurrentAmmo() + $inventoryAmmoAmount);
                         $onSucceed($inventoryAmmoAmount);
