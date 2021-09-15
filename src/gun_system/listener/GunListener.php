@@ -18,6 +18,7 @@ use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\item\ItemIds;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
@@ -33,7 +34,7 @@ class GunListener implements Listener
 
     public function tryShootingOnce(Player $player, Item $item): void {
         if ($item instanceof ItemGun) {
-            if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
+            if (!$player->getInventory()->contains(ItemFactory::get(ItemIds::ARROW, 0, 1))) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
             } else {
                 $item->shootOnce($player);
@@ -43,7 +44,7 @@ class GunListener implements Listener
 
     public function tryShooting(Player $player, Item $item): void {
         if ($item instanceof ItemGun) {
-            if (!$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))) {
+            if (!$player->getInventory()->contains(ItemFactory::get(ItemIds::ARROW, 0, 1))) {
                 $player->sendMessage("矢がないと銃を撃つことはできません");
             } else if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
                 $item->aim();
@@ -136,13 +137,13 @@ class GunListener implements Listener
         $player = $event->getPlayer();
         $item = $player->getInventory()->getItemInHand();
         if ($player->isSneaking()) {
-            $player->getArmorInventory()->removeItem(ItemFactory::get(Item::PUMPKIN));
+            $player->getArmorInventory()->removeItem(ItemFactory::get(ItemIds::PUMPKIN));
             $player->removeEffect(Effect::SLOWNESS);
         } else if ($item instanceof ItemGun) {
             $effectLevel = $item->getGun()->getScope()->getMagnification();
             $player->addEffect(new EffectInstance(Effect::getEffect(Effect::SLOWNESS), null, $effectLevel, false));
             if ($item->getGun()->getType()->equals(GunType::SniperRifle())) {
-                $player->getArmorInventory()->setHelmet(ItemFactory::get(Item::PUMPKIN));
+                $player->getArmorInventory()->setHelmet(ItemFactory::get(ItemIds::PUMPKIN));
             }
         }
     }

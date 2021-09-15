@@ -47,7 +47,7 @@ class GunType
         return new GunType("Revolver");
     }
 
-    public static function DMR():GunType {
+    public static function DMR(): GunType {
         return new GunType("DMR");
     }
 
@@ -85,7 +85,7 @@ class GunType
     /**
      * @return string
      */
-    public function getTypeText() {
+    public function getTypeText(): string {
         return $this->type;
     }
 }

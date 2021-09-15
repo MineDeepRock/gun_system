@@ -12,11 +12,11 @@ use pocketmine\Player;
 class GunGiveCommand extends Command
 {
     public function __construct() {
-        parent::__construct("GunGive", "", "");
-        $this->setPermission("GunGive.Command");
+        parent::__construct("gungive", "", "");
+        $this->setPermission("gungive");
     }
 
-    public function execute(CommandSender $sender, string $commandLabel, array $args) {
+    public function execute(CommandSender $sender, string $commandLabel, array $args) :bool {
         if (count($args) === 0) {
             $sender->sendMessage("/gungive name");
             return true;

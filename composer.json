@@ -13,7 +13,7 @@
     }
   },
   "require": {
-    "pocketmine/pocketmine-mp": "*",
+    "pocketmine/pocketmine-mp": "3.22.5",
     "ext-gd": "*",
     "ext-json": "*"
   }
